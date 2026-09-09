@@ -1,0 +1,18 @@
+<?php
+function emp_icon(string $name): string {
+    $p=['dashboard'=>'<path d="M3 13h8V3H3v10Zm10 8h8V3h-8v18ZM3 21h8v-6H3v6Z"/>','user'=>'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>','wallet'=>'<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H20a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5.5A2.5 2.5 0 0 1 3 17.5v-10Z"/><path d="M3 8h17M16 13h6"/>','lock'=>'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>','logout'=>'<path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-5"/>'];
+    $path=$p[$name]??$p['dashboard']; return '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'.$path.'</svg>';
+}
+function employee_sidebar(string $active): void {
+    $items=[['dashboard','dashboard','Dashboard','dashboard.php'],['profile','user','My Profile','profile.php'],['payroll','wallet','My Payroll','payroll.php'],['attendance','dashboard','Attendance','attendance.php']];
+    echo '<aside class="sidebar employee-sidebar" id="appSidebar"><button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Collapse sidebar">←</button><a class="brand" href="dashboard.php"><img class="brand-logo" src="../uploads/logo.png" alt="LCC Payroll"><div class="brand-text"><div class="brand-title">LCC PAYROLL</div><div class="brand-sub">EMPLOYEE PORTAL</div></div></a><nav class="nav">';
+    foreach($items as $item){$a=$active===$item[0]?' active':'';echo '<a class="nav-link mobile-priority'.$a.'" href="'.e($item[3]).'" title="'.e($item[2]).'" data-nav-title="'.e($item[2]).'"><span class="nav-icon">'.emp_icon($item[1]).'</span><span class="nav-label">'.e($item[2]).'</span></a>';}
+    echo '</nav><div class="employee-side-footer"><a class="nav-link mobile-secondary" href="logout.php" title="Logout" data-nav-title="Logout"><span class="nav-icon">'.emp_icon('logout').'</span><span class="nav-label">Logout</span></a></div>';
+    echo '<div class="mobile-more-wrap employee-more-wrap">';
+    echo '<button type="button" class="mobile-more-toggle" aria-expanded="false" aria-label="More navigation"><span class="nav-icon">⋯</span><span class="nav-label">More</span></button>';
+    echo '<div class="mobile-more-menu" role="menu"><a href="change_password.php" role="menuitem"><span>'.emp_icon('lock').'</span>Change Password</a><a href="logout.php" role="menuitem"><span>'.emp_icon('logout').'</span>Logout</a></div></div></aside>';
+}
+function employee_topbar(string $title): void {
+    $name=$_SESSION['employee_name']??'Employee'; $initial=strtoupper(substr(trim($name),0,1))?:'E';
+    echo '<header class="topbar"><div class="topbar-left"><div class="topbar-title">'.e($title).'</div></div><div class="topbar-actions"><button type="button" class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle dark mode"><span id="themeIcon">☾</span></button><div class="admin-menu"><button type="button" class="admin-chip" id="adminMenuButton" aria-expanded="false"><span class="avatar">'.e($initial).'</span><span class="admin-name">'.e($name).'</span><span class="admin-chevron">⌄</span></button><div class="admin-dropdown" id="adminDropdown"><div class="admin-dropdown-name">'.e($name).'</div><a class="dropdown-item" href="profile.php"><span>◉</span> My Profile</a><a class="dropdown-item" href="attendance.php"><span>◷</span> Attendance</a><a class="dropdown-item" href="change_password.php"><span>⚙</span> Change Password</a><a class="dropdown-item danger-item" href="logout.php"><span>↪</span> Logout</a></div></div></div></header>';
+}
