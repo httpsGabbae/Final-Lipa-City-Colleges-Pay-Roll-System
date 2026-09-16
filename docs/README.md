@@ -1,450 +1,185 @@
-# LCC Payroll System
+# LCC Payroll System — Product MVP
 
-## Overview
-
-The **LCC Payroll System** is a web-based employee and payroll management application designed for **Lipa City Colleges (LCC)**.
-
-The system brings employee records, salary information, payroll processing, reporting, and printable records into one centralized application. It is designed to make common payroll and personnel tasks easier to manage while keeping the interface simple enough for day-to-day administrative use.
-
-The project is built with **PHP and MySQL/MariaDB**, with **FPDF** used for print-ready payroll and employee reports.
+> **One-liner:** A web-based employee + payroll workspace for Lipa City Colleges: one admin app for people, attendance, pay, reports, and print-ready records — plus a self-service portal for employees.
+>
+> **Status:** Actively developed. This document defines the **Minimum Viable Product**: the smallest scope that is genuinely usable by a real payroll administrator. Anything not listed here is explicitly out of MVP scope.
+>
+> Full system documentation lives in [`docs/README.md`](docs/README.md).
 
 ---
 
-## Purpose of the System
+## 1. Problem
 
-The main purpose of the system is to provide a centralized platform for managing employee information and payroll records.
+Payroll administration at LCC runs on employee records, attendance facts, pay computations, and formal printed documents. When these live in separate places (spreadsheets, paper files, chat messages), the failure modes are predictable:
 
-Instead of maintaining employee information and payroll data separately, the system connects employee records with their corresponding payroll records. This makes it easier to view employee details, prepare payroll entries, monitor payroll status, and generate reports for a selected period.
+- Employee data and pay data drift out of sync (wrong department, stale salary).
+- Payroll is prepared without seeing attendance exceptions first.
+- There is no single status trail (was this period's pay drafted, approved, or released?).
+- Printed records are re-typed by hand instead of generated from the same data.
 
-The system also provides printable documents so that important employee and payroll information can be presented as formal records.
+The MVP exists to remove exactly these four failure modes — nothing more.
 
----
+## 2. Users
 
-## System Modules
+| Role | Who | Needs |
+|---|---|---|
+| **Payroll administrator** | LCC staff operating the system | Add/maintain employees, record attendance, prepare and track payroll, review monthly reports, print official records |
+| **Employee** | LCC personnel with portal access | View own profile, check own payroll history, time in/out daily, change own password |
 
-### 1. Login and Authentication
+There is deliberately **no admin self-registration**: administrator accounts are provisioned out-of-band. The employee portal login is Employee ID + password issued by the administrator.
 
-The system starts with an administrator login page. Authentication protects the administrative pages and prevents unauthorized users from accessing employee and payroll information.
+## 3. MVP Goal & Success Criteria
 
-The authentication area handles:
+**Goal:** One administrator can run a complete monthly pay cycle for all employees — from record maintenance to printed reports — without leaving the system.
 
-- Administrator login
-- Session-based access control
-- Logout
-- Password-related functions
-- Database connection
+The MVP is done when **all** of these are true:
 
----
+1. An admin can add an employee and find them in the directory within a minute.
+2. A full pay cycle (Draft → Approved → Paid) can be completed for every active employee for one pay period.
+3. The monthly report's totals reconcile exactly with the sum of its payroll records.
+4. Every payroll record and employee record can be produced as a formal printed/PDF document.
+5. An employee can sign into the portal and see only their own profile, pay history, and attendance.
+6. The app is usable on a desktop and a 360px-wide phone, in light and dark mode.
 
-### 2. Dashboard
+## 4. Scope — Must-Have Modules (MVP)
 
-The dashboard provides a quick overview of the organization's workforce rather than displaying detailed payroll amounts.
+### M1. Authentication & Sessions
+- [x] Admin login with session gate on every protected page (`includes/auth.php`, `$_SESSION['admin_id']`)
+- [x] Employee portal login with active-employment-status check (`employee/auth.php`)
+- [x] Logout for both roles
+- [x] Password change (min 8 chars) for both roles; no admin self-registration by design
+- [x] CSRF token on every `POST` handler (`require_csrf()` / `csrf_field()`), 419 on failure
+- [x] All HTML output escaped via `e()`
 
-It includes information such as:
+**Acceptance:** logged-out access to any `pages/*` (except login) redirects to login; forged POSTs are rejected; passwords stored hashed.
 
-- Total number of employees
-- Number of departments
-- Regular employees
-- Other employment statuses
-- Employees grouped by department
-- Employment status distribution
-- Quick access to major system modules
+### M2. Workforce Dashboard
+- [x] Greeting + one-line operational summary (active headcount, today's check-ins, this month's records)
+- [x] Employee card with live headcount and 6-month hires sparkline from real data
+- [x] Three drill-down rows: Attendance today, Payroll this month, Needs attention (late / missing department / missing salary)
+- [x] No salary figures on the dashboard (privacy: money lives only in Payroll/Reports)
 
-The dashboard is intended to provide an administrative overview at a glance while keeping detailed financial information inside the Payroll and Reports sections.
+**Acceptance:** every number shown matches its source table; every row links to the screen that explains it.
 
----
+### M3. Employee Management
+- [x] Searchable/sortable directory (name, position, department) with photos and avatars
+- [x] Add employee with locked-by-default form (explicit unlock → edit → save)
+- [x] Full record: identity, personal info, contact, government IDs (SSS/PhilHealth/Pag-IBIG/TIN/ATM), employment, emergency contact, dependent, education, character reference
+- [x] Photo upload (2MB max, JPG/PNG verified, old-file cleanup)
+- [x] Auto-generated employee numbers (`25-NNNN`, configurable prefix/digits via `app_settings`)
+- [x] Employment statuses via `active_employment_statuses()` — never hardcoded lists
+- [x] Dossier-style read-only record + salary view kept separate from the directory
 
-### 3. Employee Management
+**Acceptance:** duplicate employee numbers impossible; delete requires confirm; inactive/separated staff excluded from active counts but never silently dropped.
 
-The Employee Management module serves as the main employee directory.
+### M4. Departments & Positions
+- [x] CRUD for departments (name, code, description, Active/Inactive) with per-department identity color
+- [x] Positions nested per department, deletable only when no employee holds them
+- [x] Department dropdown feeds the employee form (positions filter by chosen department)
+- [x] Smooth expand/collapse of department cards; responsive stacking on small screens
 
-Administrators can manage employee information including:
+**Acceptance:** deleting a department/position that is in use is refused with the affected headcount; inactive departments disappear from the employee form.
 
-- Employee number
-- Full name
-- Gender
-- Birth date
-- Contact information
-- Email address
-- Civil status
-- Nationality
-- Address information
-- Government reference numbers
-- Department
-- Position
-- Employment status
-- Basic salary
-- Date hired
-- Emergency contact
-- Dependent information
-- Educational background
-- Character references
-- Employee photo
+### M5. Attendance
+- [x] Admin view: daily records with filters, late/present/absent/leave/half-day badges, printable report
+- [x] Employee self-service: one-click Time In / Time Out with live clock, personal history + print
+- [x] Today's exceptions (late/incomplete) surface on the dashboard *before* payroll runs
 
-The employee list is focused on personnel information. Salary information is handled separately so that the main employee directory remains cleaner and easier to navigate.
+**Acceptance:** an employee cannot have two open time-ins for the same day; admin report prints cleanly in both themes.
 
----
+### M6. Payroll Processing (the core transaction)
+- [x] Create payroll per employee + pay period: allowances, other earnings, deductions editable; **basic salary always read from the employee record, never from POST**
+- [x] Enforced math: `gross = basic + allowances + other_earnings`, `net = gross − deductions`
+- [x] Enforced guards: no negatives, `deductions ≤ gross`, `period_end ≥ period_start`, no duplicate `(employee_id, period_start, period_end)`
+- [x] Status lifecycle **Draft → Approved → Paid** via the single `update_status` action only
+- [x] Payslip preview + individual payroll PDF
 
-### 4. Employee Record / Dossier
+**Acceptance:** recomputing any record from its components reproduces gross/net to the centavo; illegal states are rejected server-side, not just hidden in the UI.
 
-Each employee can be opened as an individual record containing organized personnel information.
+### M7. Monthly Reports
+- [x] Month picker with totals: records, gross, deductions, net, paid count
+- [x] Department payroll breakdown (identity-colored bars)
+- [x] 6-month Gross-vs-Net trend chart
+- [x] Month-overlapping query predicate kept everywhere (`period_start <= monthEnd AND period_end >= monthStart`)
 
-The employee record is presented as a dossier-style document with sections for employment, personal information, addresses, and government references.
+**Acceptance:** report totals equal the SQL aggregates of the listed records; a payroll spanning two months appears in both.
 
-Individual employee records can also be printed as formal documents using FPDF.
+### M8. Print & PDF Output
+- [x] FPDF documents: single employee, employee directory, all profiles, single payslip, all payroll, monthly report — all with `Page X of Y` footers
+- [x] Browser-print paths (directory, attendance, reports, payroll statement, employee preview) that force a light theme on paper regardless of dark mode
+- [x] Money formatted as `PHP …` in PDFs (never `₱`, which FPDF cannot render); `₱ …` only in HTML
 
-The printed employee record uses a clean document header containing:
+**Acceptance:** a printed page contains record data only — no nav, buttons, or dark backgrounds.
 
-- LCC Payroll System
-- Employee Record
-- Printed date and time
-- Official employee record label
+### M9. Employee Self-Service Portal
+- [x] Dashboard with today's attendance state, recent payroll, profile completeness
+- [x] Read-only profile, personal payroll history with print, attendance history with print
+- [x] Sample seeded login from fresh install: `25-0001` / `Employee@123`
 
-Unnecessary screen controls such as print buttons and close buttons are excluded from the actual printed document.
+**Acceptance:** employees see zero records belonging to anyone else (verified at the SQL level, not just hidden links).
 
----
+### M10. Cross-Cutting UX Baseline
+- [x] Responsive layouts (desktop rail sidebar → mobile drawer, thumb-reach actions)
+- [x] Dark mode with no light-surface leaks, honoring `prefers-reduced-motion` / transparency / contrast
+- [x] Uniform type scale and one-color-per-meaning hierarchy (green = good, amber = needs eyes, red = destructive, blue = info, violet = special)
+- [x] Instant press feedback, interruptible motion, printable-everything discipline
 
-### 5. Salary Information
+## 5. Explicitly OUT of MVP Scope
 
-Salary information is separated from the main employee table to keep employee browsing organized.
+These are real needs but **not** required for v1. Do not build them before every box in §4 is checked:
 
-The salary section displays the employee's relevant employment and compensation information, including the employee's basic salary.
+- Automatic tax/SSS/PhilHealth/Pag-IBIG computation tables (deductions are entered amounts in MVP)
+- Bank disbursement files / payroll auto-release to accounts
+- Multi-admin roles and permissions (single admin role in MVP)
+- Audit log / activity trail UI
+- Email/SMS notifications (payslip ready, password reset)
+- Leave management and overtime rules engine
+- Biometric/time-clock hardware integration
+- Multi-branch / multi-company support
+- Public API
 
-Payroll-related earnings and deductions are recorded through the Payroll module rather than directly modifying historical payroll records.
+## 6. Core User Journeys (must all work end-to-end)
 
----
+1. **Hire → pay:** Add employee → auto-number issued → appears in directory → payroll created for period → Draft → Approved → Paid → appears in monthly report → payslip printed.
+2. **Exception first:** Employee times in late → dashboard "Needs attention" shows it → admin reviews attendance → then runs payroll.
+3. **Fix the record:** Missing department/salary flagged on dashboard → admin completes the employee record → flag clears.
+4. **Prove it on paper:** Any record or monthly report prints as a formal document from the same data shown on screen.
+5. **Employee view:** Employee signs in → checks today's attendance state → reviews a past payslip → prints it.
 
-### 6. Payroll Management
+## 7. Non-Functional Requirements
 
-The Payroll module is used to create and manage payroll records for employees.
-
-A payroll record can contain:
-
-- Employee
-- Payroll period start
-- Payroll period end
-- Basic salary
-- Allowances
-- Other earnings
-- Deductions
-- Gross pay
-- Net pay
-- Payroll status
-- Notes
-
-The system calculates the payroll totals from the recorded earnings and deductions, allowing the resulting gross and net amounts to be displayed consistently throughout the system.
-
-Payroll records also have a status that allows them to be tracked through different stages:
-
-- **Draft** – payroll information is still being prepared
-- **Approved** – payroll has been reviewed or approved
-- **Paid** – payroll has been released or marked as paid
-
----
-
-## Payroll Calculation Concept
-
-The system separates the major components of payroll so that the calculation can be understood clearly.
-
-**Gross Pay** represents the employee's earnings before deductions.
-
-**Net Pay** represents the remaining amount after deductions are applied.
-
-The payroll record stores the resulting gross and net amounts together with the individual earning and deduction components.
-
----
-
-## 7. Reports
-
-The Reports module provides a more detailed view of payroll information for a selected month.
-
-The monthly report includes summary information such as:
-
-- Number of payroll records
-- Total gross payroll
-- Total deductions
-- Total net payroll
-- Number of paid records
-- Payroll records included in the selected period
-- Department payroll breakdown
-
-The report is intended for administrative review and provides a more complete financial view than the main dashboard.
-
----
-
-## Six-Month Payroll Overview
-
-The Reports section includes a compact **six-month Gross vs Net Payroll bar graph**.
-
-The graph compares the following values for each month:
-
-- Gross payroll
-- Net payroll
-
-The selected report month is included together with the five preceding months. This gives administrators a quick way to see how payroll totals have changed over time without taking up a large amount of space on the report page.
-
-The same concept is also included in the printable monthly FPDF report so that the visual summary is preserved when the report is printed.
-
----
-
-## 8. Printable Reports
-
-Printing is handled separately from the normal web interface using FPDF.
-
-The system provides print-ready documents for:
-
-- Individual employee records
-- Employee lists
-- Individual payroll records
-- All payroll records
-- Monthly payroll reports
-
-The monthly payroll printout includes the selected reporting period, payroll information, totals, department information, and the compact six-month payroll graph.
-
-Printed documents also record the date and time when the report was generated.
-
-The goal of the print system is to produce documents that look like formal administrative records rather than simply printing the application's web interface.
-
----
-
-## User Interface
-
-The application uses a responsive administrative interface intended for both desktop and mobile screens.
-
-The interface includes:
-
-- Sidebar navigation
-- Responsive layouts
-- Employee management screens
-- Payroll forms
-- Report views
-- Modal-based employee information
-- Print-friendly document views
-- Dark mode support
-- Mobile-friendly controls
-
-The web interface and the printable FPDF documents are intentionally treated as separate experiences. The web interface contains interactive controls, while the printed documents contain only the information needed for the official record.
-
----
-
-## Technology Stack
-
-| Technology | Purpose |
+| Area | MVP bar |
 |---|---|
-| **PHP** | Server-side application logic |
-| **MySQL / MariaDB** | Database management |
-| **HTML** | Page structure |
-| **CSS** | Interface styling and responsive layout |
-| **JavaScript** | Client-side interactions and interface behavior |
-| **FPDF** | PDF and print-ready document generation |
-| **Composer** | PHP dependency management |
-|
----
+| Security | Session gates, CSRF on all POSTs, escaped output, hashed passwords, salary never trusted from client input |
+| Data integrity | Duplicate-period guard, non-negative amounts, status machine enforced server-side |
+| Performance | Directory/report queries paginated or capped; pages usable on shared hosting + XAMPP defaults |
+| Compatibility | Current Chrome/Edge/Firefox/Safari; 360px phones; print to A4 |
+| Accessibility | Focus-visible states, `aria` labels on icon buttons, reduced-motion fallbacks |
+| Maintainability | No framework to learn: plain PHP + MySQLi, shared `includes/`, one design-system stylesheet layered over page CSS |
 
-## Database Structure
+## 8. Tech & Run (5 minutes)
 
-The database is organized around several main areas of the system.
+- **Stack:** Plain PHP + MySQLi, FPDF via Composer (`setasign/fpdf`). No framework, no build step.
+- **Run:** XAMPP → place repo as a docroot subfolder → entry `index.php` redirects to `pages/login.php`.
+- **Database:** `config/database.php` → `localhost / root / '' / lcc_payroll`, `Asia/Manila`. Create the empty DB in phpMyAdmin, then import the canonical fresh-install schema from `database/` (`schema.sql`). Fresh installs only — never import over an old DB unless replacing it. (If `database/` is empty in your checkout, obtain the schema file before proceeding.)
+- **Check a change:** `php -l <file>` + load the page. No tests/lint/CI in MVP.
+- **Standalone demo (not part of MVP):** `bpo_payroll_offer/` is a separate SQLite demo with its own README — shares nothing with the main app.
 
-### Administrators
+## 9. Suggested Build Order (if resuming from zero)
 
-Stores administrator accounts used to access the system.
+1. Auth + DB + employee CRUD + auto-numbering (M1, M3-core)
+2. Departments/positions + employee form wiring (M4)
+3. Attendance, admin + employee sides (M5)
+4. Payroll math + status lifecycle (M6) ← the riskiest module; build it early
+5. Dashboard + reports (M2, M7)
+6. Portal self-service (M9)
+7. Print/PDF + print-theme discipline (M8)
+8. UX baseline pass: responsive, dark mode, motion, hierarchy (M10)
+9. Reconciliation testing against §3 success criteria, then release v1
 
-### Employees
+## 10. Definition of Done (per feature)
 
-Stores the main personnel information for every employee. This includes personal information, employment information, contact details, salary information, and other employee references.
-
-### Payroll Records
-
-Stores individual payroll transactions and connects each payroll record to an employee.
-
-Payroll records contain the payroll period, earnings, deductions, gross pay, net pay, status, and notes.
-
-### Application Settings
-
-Stores configurable system values such as employee-number formatting settings.
-
-The database also uses relationships between employees and payroll records so that payroll entries remain associated with the correct employee.
-
----
-
-## Employee Number Format
-
-The system uses a human-readable employee number separate from the internal database ID.
-
-The default employee-number format uses:
-
-- Prefix: **25**
-- Four numeric digits
-
-Examples:
-
-- **25-0001**
-- **25-0002**
-- **25-0003**
-
-The internal database ID remains separate from the employee-facing number.
-
----
-
-## Project Organization
-
-The project is separated into functional areas to make the system easier to maintain.
-
-### Main application pages
-
-- `login.php` – administrator login page
-- `admin_dashboard.php` – workforce dashboard
-- `employees.php` – employee directory
-- `personalinfo.php` – employee information management
-- `salary_info.php` – salary information
-- `payroll.php` – payroll management
-- `reports.php` – monthly payroll reports
-- `employee_preview.php` – employee record preview
-- `payroll_preview.php` – payroll record preview
-
-### Authentication
-
-The `auth` directory contains login, logout, password, and database connection functions.
-
-### Shared components
-
-The `includes` directory contains reusable authentication, layout, and FPDF-related helpers.
-
-### Printing
-
-The `print` directory contains the FPDF documents generated by the system.
-
-### Assets
-
-The `assets` directory contains the application's CSS and JavaScript resources.
-
-### Database
-
-The `database` directory contains the SQL schema used to create the application's database structure.
-
-### Uploads
-
-The `uploads` directory contains the application logo and employee photos.
-
----
-
-## Typical System Workflow
-
-The normal administrative workflow is:
-
-**Login → Dashboard → Employee Management → Payroll → Reports → Print**
-
-1. The administrator signs into the system.
-2. The dashboard provides an overview of the workforce.
-3. Employee information is added or maintained in Employee Management.
-4. Salary and employment information can be reviewed separately.
-5. Payroll records are prepared for the appropriate employee and pay period.
-6. Payroll status can be updated as the record progresses.
-7. Reports are reviewed by month.
-8. The monthly report can be printed as an official FPDF document.
-
----
-
-## Design Goals
-
-The system was developed around several practical goals:
-
-- Keep employee and payroll information organized.
-- Reduce unnecessary duplication of information.
-- Make payroll records easier to review.
-- Keep financial information out of the general workforce dashboard.
-- Provide useful monthly payroll summaries.
-- Make reports suitable for printing.
-- Keep the interface usable on both desktop and mobile devices.
-- Separate interactive web controls from official printed documents.
-- Keep the project structure understandable for future development and maintenance.
-
----
-
-## Current System Highlights
-
-The current version includes the following major improvements:
-
-- Workforce-focused administrative dashboard
-- Separate salary information view
-- Employee dossier-style records
-- Responsive employee management interface
-- Payroll record management
-- Payroll status tracking
-- Monthly payroll reporting
-- Department payroll breakdown
-- Six-month Gross vs Net payroll bar graph
-- Six-month graph included in the printable monthly report
-- FPDF employee records
-- FPDF payroll reports
-- Print timestamps
-- Clean print-specific layouts
-- Mobile-responsive interface
-- Dark mode support
-- Organized PHP, CSS, JavaScript, database, and print directories
-
----
-
-## Project Status
-
-This project is an actively developed payroll and personnel management system. Features and interface details may continue to change as the system is improved and tested.
-
-The current focus is on maintaining a clean administrative workflow, reliable payroll records, useful reporting, responsive design, and professional print output.
-
----
-
-## Notes
-
-This repository contains the application source code and database structure for the LCC Payroll System. Before deploying the system to an actual production environment, database credentials, administrator accounts, file permissions, uploaded files, and other deployment-specific settings should be reviewed and secured appropriately.
-
----
-
-**LCC Payroll System**  
-Employee & Payroll Management System for Lipa City Colleges
-
-## Project Structure
-
-All PHP application pages are grouped inside `pages/`. The project root is kept minimal, with only the entry point and project-level configuration/documentation. Supporting code is separated by responsibility.
-
-```text
-LCC-Payroll-System/
-├── pages/
-│   ├── login.php
-│   ├── admin_dashboard.php
-│   ├── employees.php
-│   ├── personalinfo.php
-│   ├── employee_preview.php
-│   ├── salary_info.php
-│   ├── payroll.php
-│   ├── payroll_preview.php
-│   └── reports.php
-├── auth/
-│   ├── login.php
-│   ├── logout.php
-│   └── change_password.php
-├── config/
-│   └── database.php
-├── includes/
-│   ├── auth.php
-│   ├── layout.php
-│   └── pdf.php
-├── print/
-│   ├── employee.php
-│   ├── employee_profiles.php
-│   ├── employees.php
-│   ├── monthly_payroll.php
-│   ├── payroll.php
-│   └── payroll_all.php
-├── assets/
-│   ├── css/
-│   └── js/
-├── uploads/
-│   ├── employee_photos/
-│   └── logos
-├── database/
-│   └── schema.sql
-├── index.php
-├── composer.json
-├── composer.lock
-└── README.md
-```
+- Code follows repo conventions (`AGENTS.md`): auth include first, `require_csrf()` on POSTs, `e()` on output, `money()`/`pdf_money()` correctly, no hardcoded employment-status lists.
+- Works in light **and** dark mode, desktop **and** 360px mobile.
+- Printable where the module promises print.
+- `php -l` clean; manual walkthrough of its §6 journey passes.
