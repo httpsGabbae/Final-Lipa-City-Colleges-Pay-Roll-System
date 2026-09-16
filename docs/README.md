@@ -4,7 +4,6 @@
 >
 > **Status:** Actively developed. This document defines the **Minimum Viable Product**: the smallest scope that is genuinely usable by a real payroll administrator. Anything not listed here is explicitly out of MVP scope.
 >
-> Full system documentation lives in [`docs/README.md`](docs/README.md).
 
 ---
 
@@ -176,10 +175,3 @@ These are real needs but **not** required for v1. Do not build them before every
 7. Print/PDF + print-theme discipline (M8)
 8. UX baseline pass: responsive, dark mode, motion, hierarchy (M10)
 9. Reconciliation testing against §3 success criteria, then release v1
-
-## 10. Definition of Done (per feature)
-
-- Code follows repo conventions (`AGENTS.md`): auth include first, `require_csrf()` on POSTs, `e()` on output, `money()`/`pdf_money()` correctly, no hardcoded employment-status lists.
-- Works in light **and** dark mode, desktop **and** 360px mobile.
-- Printable where the module promises print.
-- `php -l` clean; manual walkthrough of its §6 journey passes.
