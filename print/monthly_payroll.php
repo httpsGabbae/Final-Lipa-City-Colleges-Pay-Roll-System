@@ -91,12 +91,13 @@ class MonthlyPayrollPDF extends FPDF
         $this->SetY(-12);
         $this->SetFont('Arial', '', 7);
         $this->SetTextColor(110, 123, 128);
-        $this->Cell(0, 6, pdf_text('Private and Confidential · LCC Payroll System · Page ' . $this->PageNo()), 0, 0, 'C');
+        $this->Cell(0, 6, pdf_text('Private and Confidential · LCC Payroll System · Page ' . $this->PageNo() . ' of {nb}'), 0, 0, 'C');
     }
 }
 
 $reportSubtitle = date('F Y', strtotime($monthStart)) . ' · payroll period register';
 $pdf = new MonthlyPayrollPDF('L', 'mm', 'A4');
+$pdf->AliasNbPages();
 $pdf->SetMargins(12, 10, 12);
 $pdf->SetAutoPageBreak(true, 18);
 $pdf->AddPage();

@@ -48,7 +48,7 @@ foreach ($trend as $point) $trendMax = max($trendMax, $point['gross'], $point['n
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- FAVICON: Put your favicon file at /assets/favicon.png (replace the included LCC placeholder if desired). -->
-<link rel="icon" type="image/png" href="../assets/favicon.png"><title>LCC Payroll System</title><link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><script src="../assets/js/app.js?v=20260909-rail4" defer></script></head>
+<link rel="icon" type="image/png" href="../assets/favicon.png"><title>LCC Payroll System</title><link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7"><script src="../assets/js/app.js?v=20260916-rail5" defer></script><script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script></head>
 <body><div class="app">
 <?php sidebar('reports'); ?>
 <main class="main">
@@ -93,7 +93,7 @@ foreach ($trend as $point) $trendMax = max($trendMax, $point['gross'], $point['n
             </tbody></table></div>
         </div>
         <aside class="card report-side-card"><div class="card-head"><div><div class="eyebrow">Breakdown</div><h2>By Department</h2></div></div><div class="department-bars">
-            <?php if (!$departments): ?><div class="empty">No department data.</div><?php else: foreach (array_slice($departments,0,6,true) as $department=>$count): $width=max(8,round(($count/max($departments))*100)); ?><div class="department-row"><div><span><?php echo e($department); ?></span><strong><?php echo (int)$count; ?></strong></div><div class="bar"><i style="width:<?php echo $width; ?>%"></i></div></div><?php endforeach; endif; ?>
+            <?php if (!$departments): ?><div class="empty">No department data.</div><?php else: foreach (array_slice($departments,0,6,true) as $department=>$count): $width=max(8,round(($count/max($departments))*100)); ?><div class="department-row"><div><span><?php echo e($department); ?></span><strong><?php echo (int)$count; ?></strong></div><div class="bar"><i style="width:<?php echo $width; ?>%;--dept-c:var(--dept-<?php echo (abs(crc32((string)$department)) % 8 + 1); ?>)"></i></div></div><?php endforeach; endif; ?>
         </div><div class="report-callout"><span><?php echo ui_icon('file-chart'); ?></span><div><strong>Ready for filing?</strong><p>Use the print action to create the formal monthly payroll report for records or submission.</p></div></div></aside>
     </section>
 </div></main></div>

@@ -7,18 +7,41 @@ $error = '';
 $showForm = isset($_GET['add']) && $_GET['add'] === '1';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
+    $postAction = $_POST['action'] ?? 'create';
+    if ($postAction === 'update_status') {
+        $payrollId = (int)($_POST['payroll_id'] ?? 0);
+        $newStatus = $_POST['status'] ?? '';
+        $allowedStatuses = ['Draft', 'Approved', 'Paid'];
+        if ($payrollId <= 0 || !in_array($newStatus, $allowedStatuses, true)) {
+            $error = 'Invalid payroll status update.';
+        } else {
+            $stmt = $conn->prepare('UPDATE payroll_records SET status=? WHERE payroll_id=?');
+            $stmt->bind_param('si', $newStatus, $payrollId);
+            if ($stmt->execute()) {
+                header('Location: payroll.php?status_updated=1');
+                exit;
+            }
+            $error = 'Unable to update the payroll status.';
+        }
+    } else {
     $employeeId = (int)($_POST['employee_id'] ?? 0);
     $start = $_POST['period_start'] ?? '';
     $end = $_POST['period_end'] ?? '';
-    $allowances = (float)($_POST['allowances'] ?? 0);
-    $other = (float)($_POST['other_earnings'] ?? 0);
-    $deductions = (float)($_POST['deductions'] ?? 0);
+    $allowances = round((float)($_POST['allowances'] ?? 0), 2);
+    $other = round((float)($_POST['other_earnings'] ?? 0), 2);
+    $deductions = round((float)($_POST['deductions'] ?? 0), 2);
     $notes = trim($_POST['notes'] ?? '');
+    $startTs = $start === '' ? false : strtotime($start);
+    $endTs = $end === '' ? false : strtotime($end);
 
     if ($employeeId <= 0 || $start === '' || $end === '') {
         $error = 'Please choose an employee and enter the payroll period.';
         $showForm = true;
-    } elseif ($end < $start) {
+    } elseif ($startTs === false || $endTs === false) {
+        $error = 'Invalid payroll period dates.';
+        $showForm = true;
+    } elseif ($endTs < $startTs) {
         $error = 'The payroll end date cannot be earlier than the start date.';
         $showForm = true;
     } elseif ($allowances < 0 || $other < 0 || $deductions < 0) {
@@ -34,10 +57,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'The selected employee was not found.';
             $showForm = true;
         } else {
-            $basic = (float)$employee['basic_salary'];
-            $gross = $basic + $allowances + $other;
-            $net = $gross - $deductions;
+            $basic = round((float)$employee['basic_salary'], 2);
+            $gross = round($basic + $allowances + $other, 2);
+            $net = round($gross - $deductions, 2);
 
+            if ($deductions > $gross) {
+                $error = 'Deductions cannot exceed gross pay. Net pay cannot be negative.';
+                $showForm = true;
+            } else {
+                $stmt = $conn->prepare('SELECT payroll_id FROM payroll_records WHERE employee_id=? AND period_start=? AND period_end=? LIMIT 1');
+                $stmt->bind_param('iss', $employeeId, $start, $end);
+                $stmt->execute();
+                $duplicate = $stmt->get_result()->fetch_assoc();
+
+                if ($duplicate) {
+                    $error = 'A payroll record already exists for this employee and period.';
+                    $showForm = true;
+                } else {
             $stmt = $conn->prepare('INSERT INTO payroll_records(employee_id,period_start,period_end,basic_salary,allowances,other_earnings,deductions,gross_pay,net_pay,status,notes) VALUES(?,?,?,?,?,?,?,?,?,"Draft",?)');
             $stmt->bind_param('issdddddds', $employeeId, $start, $end, $basic, $allowances, $other, $deductions, $gross, $net, $notes);
 
@@ -48,12 +84,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $error = 'Unable to save the payroll record.';
             $showForm = true;
+                }
+            }
         }
+    }
     }
 }
 
 if (isset($_GET['saved'])) {
     $message = 'Payroll record saved successfully.';
+}
+if (isset($_GET['status_updated'])) {
+    $message = 'Payroll status updated.';
 }
 
 $records = $conn->query('SELECT p.*,e.employee_no,e.first_name,e.middle_name,e.last_name,e.department,e.position FROM payroll_records p JOIN employees e ON e.employee_id=p.employee_id ORDER BY p.payroll_id DESC');
@@ -70,7 +112,9 @@ $employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,b
 <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>LCC Payroll System</title>
     <link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4">
-    <script src="../assets/js/app.js?v=20260909-rail4" defer></script>
+    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7">
+    <script src="../assets/js/app.js?v=20260916-rail5" defer></script>
+    <script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 </head>
 
 <body>
@@ -134,7 +178,7 @@ $employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,b
                                             <td><?php echo e(date('M d, Y', strtotime($row['period_start'])) . ' - ' . date('M d, Y', strtotime($row['period_end']))); ?></td>
                                             <td><?php echo money($row['gross_pay']); ?></td>
                                             <td><strong><?php echo money($row['net_pay']); ?></strong></td>
-                                            <td><span class="badge"><?php echo e($row['status']); ?></span></td>
+                                            <td><span class="badge"><?php echo e($row['status']); ?></span><form method="post" style="display:inline" onsubmit="return confirm('Update payroll status?')"><?php echo csrf_field(); ?><input type="hidden" name="action" value="update_status"><input type="hidden" name="payroll_id" value="<?php echo (int)$row['payroll_id']; ?>"><select name="status"><option value="Draft"<?php echo $row['status'] === 'Draft' ? ' selected' : ''; ?>>Draft</option><option value="Approved"<?php echo $row['status'] === 'Approved' ? ' selected' : ''; ?>>Approved</option><option value="Paid"<?php echo $row['status'] === 'Paid' ? ' selected' : ''; ?>>Paid</option></select><button type="submit" class="btn btn-secondary">Save</button></form></td>
                                             <td><div class="icon-actions"><button type="button" class="icon-action print" title="Print payroll statement" aria-label="Print payroll statement" onclick="printPayrollRecord(<?php echo (int)$row['payroll_id']; ?>); return false;"><?php echo ui_icon('printer'); ?></button></div></td>
                                         </tr>
                                 <?php endwhile;
@@ -163,6 +207,8 @@ $employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,b
                             <a class="btn btn-secondary" href="payroll.php">Cancel</a>
                         </div>
                         <form method="post">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="action" value="create">
                             <div class="form-body">
                                 <div class="section-title">Employee and Payroll Period</div>
                                 <div class="form-grid">

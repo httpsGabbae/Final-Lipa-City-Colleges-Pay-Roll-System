@@ -6,8 +6,12 @@ if (!isset($_SESSION['employee_id'])) {
     exit;
 }
 
-function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
-function money($value): string { return '₱ ' . number_format((float)$value, 2); }
+if (!function_exists('e')) {
+    function e($value): string { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
+}
+if (!function_exists('money')) {
+    function money($value): string { return '₱ ' . number_format((float)$value, 2); }
+}
 function employee_photo_url(?string $path): string {
     $path = ltrim(trim((string)$path), '/\\');
     return $path === '' ? '' : '../' . $path;
@@ -18,5 +22,25 @@ function current_employee(mysqli $conn): ?array {
     $stmt = $conn->prepare('SELECT * FROM employees WHERE employee_id=? LIMIT 1');
     $stmt->bind_param('i', $id);
     $stmt->execute();
-    return $stmt->get_result()->fetch_assoc() ?: null;
+    $row = $stmt->get_result()->fetch_assoc() ?: null;
+    if ($row && !is_active_employment_status($row['employment_status'] ?? '')) {
+        return null;
+    }
+    return $row;
 }
+
+$__employee_session_id = (int)($_SESSION['employee_id'] ?? 0);
+if ($__employee_session_id > 0) {
+    $stmt = $conn->prepare('SELECT employment_status FROM employees WHERE employee_id=? LIMIT 1');
+    if ($stmt) {
+        $stmt->bind_param('i', $__employee_session_id);
+        $stmt->execute();
+        $statusRow = $stmt->get_result()->fetch_assoc();
+        if (!$statusRow || !is_active_employment_status($statusRow['employment_status'] ?? '')) {
+            unset($_SESSION['employee_id'], $_SESSION['employee_no'], $_SESSION['employee_name']);
+            header('Location: login.php?error=inactive');
+            exit;
+        }
+    }
+}
+unset($__employee_session_id, $statusRow);

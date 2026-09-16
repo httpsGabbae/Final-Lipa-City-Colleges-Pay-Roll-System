@@ -2,11 +2,6 @@
 
 require_once __DIR__ . '/../config/database.php';
 
-function e($value): string
-{
-    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
-}
-
 if (isset($_SESSION['admin_id'])) {
     header('Location: ../pages/admin_dashboard.php');
     exit;
@@ -32,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($row && password_verify($password, $row['password_hash'])) {
+            session_regenerate_id(true);
             $_SESSION['admin_id'] = (int)$row['admin_id'];
             $_SESSION['admin_username'] = $row['username'];
             $_SESSION['admin_name'] = $row['full_name'];

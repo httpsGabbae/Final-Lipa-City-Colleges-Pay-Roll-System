@@ -49,11 +49,12 @@ class PayrollListPDF extends FPDF
         $this->SetY(-12);
         $this->SetFont('Arial', '', 7);
         $this->SetTextColor(110, 123, 128);
-        $this->Cell(0, 6, pdf_text('Payroll Records | Page ' . $this->PageNo()), 0, 0, 'C');
+        $this->Cell(0, 6, pdf_text('Payroll Records | Page ' . $this->PageNo() . ' of {nb}'), 0, 0, 'C');
     }
 }
 
 $pdf = new PayrollListPDF('L', 'mm', 'A4');
+$pdf->AliasNbPages();
 $pdf->SetMargins(10, 12, 10);
 $pdf->SetAutoPageBreak(true, 18);
 $pdf->AddPage();

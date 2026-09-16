@@ -19,6 +19,7 @@ if ($editId > 0) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $id = (int)($_POST['employee_id'] ?? 0);
     $first = trim($_POST['first_name'] ?? '');
     $middle = trim($_POST['middle_name'] ?? '');
@@ -166,7 +167,9 @@ if ($positionResult) {
 <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>LCC Payroll System</title>
     <link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4">
-    <script src="../assets/js/app.js?v=20260909-rail4" defer></script>
+    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7">
+    <script src="../assets/js/app.js?v=20260916-rail5" defer></script>
+    <script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 </head>
 
 <body>
@@ -199,11 +202,12 @@ if ($positionResult) {
                 </div>
 
                 <form id="employeeForm" class="form-card" method="post" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="employee_id" value="<?php echo (int)($employee['employee_id'] ?? 0); ?>">
                     <div class="form-body">
                         <div class="section-title">Employee ID</div>
                         <div class="form-grid">
-                            <div class="field"><label>Employee ID</label><input type="text" value="<?php echo $employee ? field_value($employee, 'employee_no') : next_employee_no($conn) ?>" placeholder="25-0001" readonly></div>
+                            <div class="field"><label>Employee ID</label><input type="text" value="<?php echo $employee ? field_value($employee, 'employee_no') : e(next_employee_no($conn)) ?>" placeholder="25-0001" readonly></div>
                         </div>
 
                         <div class="section-title">Personal Information</div>
@@ -300,12 +304,12 @@ if ($positionResult) {
             document.getElementById('saveButton').disabled = false;
             document.getElementById('lockedNotice').textContent = '✎ Editing is enabled. Review the information, then click Save Employee when finished.';
         }
-        const positions = <?php echo json_encode($positions); ?>;
+        const positions = <?php echo json_encode($positions, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>;
 
         const departmentSelect = document.querySelector('select[name="department"]');
         const positionSelect = document.getElementById('position');
 
-        const currentPosition = <?php echo json_encode($employee['position'] ?? ''); ?>;
+        const currentPosition = <?php echo json_encode($employee['position'] ?? '', JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>;
 
         function loadPositions() {
 

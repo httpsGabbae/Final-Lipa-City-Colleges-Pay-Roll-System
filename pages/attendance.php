@@ -6,6 +6,7 @@ $message = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $id = (int)($_POST['attendance_id'] ?? 0);
     $status = trim($_POST['status'] ?? 'Present');
     $remarks = trim($_POST['remarks'] ?? '');
@@ -81,7 +82,7 @@ elseif ($position !== '') $filterLabel = $position;
 <!-- FAVICON: Put your favicon file at /assets/favicon.png (replace the included LCC placeholder if desired). -->
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <title>LCC Payroll System</title>
-<link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><script src="../assets/js/app.js?v=20260909-rail4" defer></script>
+<link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7"><script src="../assets/js/app.js?v=20260916-rail5" defer></script><script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 </head>
 <body>
 <div class="app">
@@ -139,7 +140,7 @@ elseif ($position !== '') $filterLabel = $position;
 </section>
 </div></main></div>
 
-<div class="detail-modal-overlay" id="attendanceModal" aria-hidden="true"><div class="detail-modal" role="dialog" aria-modal="true"><div class="detail-modal-head"><div><div class="eyebrow">ATTENDANCE</div><h2>Edit Record</h2></div><button type="button" class="modal-icon-close" onclick="closeAttendance()">×</button></div><div class="detail-modal-body"><form method="post"><input type="hidden" name="attendance_id" id="attId"><label>Status<select name="status" id="attStatus"><option>Present</option><option>Late</option><option>Absent</option><option>On Leave</option><option>Half Day</option></select></label><label>Remarks<textarea name="remarks" id="attRemarks" rows="4"></textarea></label><div class="settings-actions"><button type="button" class="btn btn-secondary" onclick="closeAttendance()">Cancel</button><button class="btn btn-primary">Save Changes</button></div></form></div></div></div>
+<div class="detail-modal-overlay" id="attendanceModal" aria-hidden="true"><div class="detail-modal" role="dialog" aria-modal="true"><div class="detail-modal-head"><div><div class="eyebrow">ATTENDANCE</div><h2>Edit Record</h2></div><button type="button" class="modal-icon-close" onclick="closeAttendance()">×</button></div><div class="detail-modal-body"><form method="post"><?php echo csrf_field(); ?><input type="hidden" name="attendance_id" id="attId"><label>Status<select name="status" id="attStatus"><option>Present</option><option>Late</option><option>Absent</option><option>On Leave</option><option>Half Day</option></select></label><label>Remarks<textarea name="remarks" id="attRemarks" rows="4"></textarea></label><div class="settings-actions"><button type="button" class="btn btn-secondary" onclick="closeAttendance()">Cancel</button><button class="btn btn-primary">Save Changes</button></div></form></div></div></div>
 <script>
 function editAttendance(r){document.getElementById('attId').value=r.attendance_id;document.getElementById('attStatus').value=r.status;document.getElementById('attRemarks').value=r.remarks||'';document.getElementById('attendanceModal').classList.add('show');document.getElementById('attendanceModal').setAttribute('aria-hidden','false')}
 function closeAttendance(){document.getElementById('attendanceModal').classList.remove('show');document.getElementById('attendanceModal').setAttribute('aria-hidden','true')}

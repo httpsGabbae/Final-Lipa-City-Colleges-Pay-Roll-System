@@ -6,14 +6,18 @@ if (!isset($_SESSION['admin_id'])) {
     exit;
 }
 
-function e($value): string
-{
-    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+if (!function_exists('e')) {
+    function e($value): string
+    {
+        return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    }
 }
 
-function money($value): string
-{
-    return '₱ ' . number_format((float)$value, 2);
+if (!function_exists('money')) {
+    function money($value): string
+    {
+        return '₱ ' . number_format((float)$value, 2);
+    }
 }
 
 function employee_name(array $employee): string
@@ -93,9 +97,12 @@ function upload_employee_photo(?array $file, ?string $current = null)
     }
 
     if ($current) {
-        $old = __DIR__ . '/../' . ltrim($current, '/');
-        if (is_file($old)) {
-            @unlink($old);
+        $cleaned = ltrim(str_replace('\\', '/', $current), '/');
+        if (strpos($cleaned, 'uploads/employee_photos/') === 0) {
+            $old = __DIR__ . '/../' . $cleaned;
+            if (is_file($old)) {
+                @unlink($old);
+            }
         }
     }
 
@@ -108,7 +115,12 @@ function delete_employee_photo(?string $path): void
         return;
     }
 
-    $file = __DIR__ . '/../' . ltrim($path, '/');
+    $cleaned = ltrim(str_replace('\\', '/', $path), '/');
+    if (strpos($cleaned, 'uploads/employee_photos/') !== 0) {
+        return;
+    }
+
+    $file = __DIR__ . '/../' . $cleaned;
     if (is_file($file)) {
         @unlink($file);
     }

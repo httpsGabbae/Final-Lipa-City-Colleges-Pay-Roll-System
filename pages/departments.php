@@ -10,6 +10,7 @@ $positionMessage = '';
 $departmentPositions = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_csrf();
     $action = $_POST['action'] ?? '';
     $departmentId = (int)($_POST['department_id'] ?? 0);
     $name = trim($_POST['department_name'] ?? '');
@@ -170,7 +171,9 @@ function department_value(?array $department, string $key): string
 <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>LCC Payroll System</title>
     <link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4">
-    <script src="../assets/js/app.js?v=20260909-rail4" defer></script>
+    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7">
+    <script src="../assets/js/app.js?v=20260916-rail5" defer></script>
+    <script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 <style>
 .department-collapsible{border:1px solid var(--border,#e5e7eb);border-radius:13px;margin-bottom:10px;overflow:hidden;background:var(--card,#fff)}
 .department-collapsible:last-child{margin-bottom:0}.department-collapsible-summary{list-style:none;cursor:pointer;padding:15px 16px;display:flex;justify-content:space-between;gap:14px;align-items:center;background:rgba(0,0,0,.018);user-select:none}.department-collapsible-summary::-webkit-details-marker{display:none}.department-collapsible-summary:hover{background:rgba(0,0,0,.035)}.department-summary-main{display:flex;align-items:center;gap:11px;min-width:0}.department-summary-copy{min-width:0}.department-summary-copy strong{display:block;font-size:13px;line-height:1.35}.department-summary-copy span{display:block;margin-top:4px;color:var(--muted);font-size:10px}.department-chevron{width:25px;height:25px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border,#e5e7eb);border-radius:50%;font-size:21px;line-height:1;transition:transform .18s ease;flex:0 0 25px}.department-collapsible[open] .department-chevron{transform:rotate(90deg)}.department-collapsible-body{padding:17px 18px;border-top:1px solid var(--border,#e5e7eb)}.department-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 22px}.department-detail-grid>div{padding:10px 0;border-bottom:1px solid var(--line);min-width:0}.department-detail-grid .full{grid-column:1/-1}.department-detail-grid span,.department-positions-head span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}.department-detail-grid strong{font-size:12px;line-height:1.5}.department-actions{display:flex;gap:8px;align-items:center;margin:14px 0 18px}.department-actions form{margin:0}.danger-outline{color:#b14d4d!important;border-color:#e5caca!important}.department-positions-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;padding-top:14px;border-top:1px solid var(--line)}.department-positions-head strong{display:block;font-size:12px}.department-positions-head>span{margin:0;text-transform:none;letter-spacing:0}.department-inline-position-form{display:flex;gap:8px;margin:11px 0}.department-inline-position-form input{flex:1;min-width:0}.position-chip-list{display:flex;flex-wrap:wrap;gap:8px}.position-chip{display:flex;align-items:center;gap:9px;border:1px solid var(--border,#e5e7eb);border-radius:11px;padding:8px 9px 8px 11px;background:#fff}.position-chip>div{min-width:0}.position-chip strong{display:block;font-size:11px}.position-chip span{display:block;color:var(--muted);font-size:9px;margin-top:2px}.position-chip form{margin:0}.department-empty{margin-top:8px}@media(max-width:700px){.department-collapsible-summary{align-items:flex-start;padding:13px}.department-summary-copy strong{font-size:12px}.department-collapsible-body{padding:14px}.department-detail-grid{grid-template-columns:1fr 1fr}.department-detail-grid .full{grid-column:1/-1}.department-actions{flex-wrap:wrap}.department-actions .btn{flex:1;min-width:120px}.department-inline-position-form{align-items:stretch;flex-direction:column}.department-inline-position-form .btn{width:100%}.department-positions-head{align-items:flex-start;flex-direction:column;gap:3px}.position-chip{width:100%;justify-content:space-between}.department-directory .card-head{padding-bottom:13px}}
@@ -207,6 +210,7 @@ function department_value(?array $department, string $key): string
                 </div>
                 <div class="form-body">
                     <form method="post">
+                        <?php echo csrf_field(); ?>
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="department_id" value="<?php echo (int)($editDepartment['department_id'] ?? 0); ?>">
                         <div class="form-grid">
@@ -255,19 +259,20 @@ function department_value(?array $department, string $key): string
                     <?php if (!$departments): ?>
                         <div class="empty">No departments have been added yet.</div>
                     <?php else: foreach ($departments as $department): ?>
-                        <?php $deptPositions = $departmentPositions[(int)$department['department_id']] ?? []; ?>
-                        <details class="department-collapsible">
+                        <?php $deptPositions = $departmentPositions[(int)$department['department_id']] ?? []; $deptTone = abs(crc32((string)$department['department_name'])) % 8 + 1; ?>
+                        <details class="department-collapsible" style="--dept-c:var(--dept-<?php echo $deptTone; ?>);--dept-c-soft:var(--dept-<?php echo $deptTone; ?>-soft)">
                             <summary class="department-collapsible-summary">
                                 <div class="department-summary-main">
+                                    <span class="dept-dot" aria-hidden="true"></span>
                                     <span class="department-chevron">›</span>
                                     <div class="department-summary-copy">
                                         <strong><?php echo e($department['department_name']); ?></strong>
                                         <span><?php echo e($department['department_code'] ?: 'No code'); ?> · <?php echo (int)$department['employee_count']; ?> employee<?php echo (int)$department['employee_count'] === 1 ? '' : 's'; ?> · <?php echo count($deptPositions); ?> position<?php echo count($deptPositions) === 1 ? '' : 's'; ?></span>
                                     </div>
                                 </div>
-                                <span class="badge"><?php echo e($department['status']); ?></span>
+                                <span class="badge <?php echo $department['status'] === 'Active' ? 'badge-ok' : 'badge-neutral'; ?>"><?php echo e($department['status']); ?></span>
                             </summary>
-                            <div class="department-collapsible-body">
+                            <div class="department-collapsible-body"><div class="dept-clip">
                                 <div class="department-detail-grid">
                                     <div><span>Department Code</span><strong><?php echo e($department['department_code'] ?: '—'); ?></strong></div>
                                     <div><span>Employees</span><strong><?php echo (int)$department['employee_count']; ?></strong></div>
@@ -277,6 +282,7 @@ function department_value(?array $department, string $key): string
                                 <div class="department-actions">
                                     <a class="btn btn-secondary btn-small" href="departments.php?edit=<?php echo (int)$department['department_id']; ?>">Edit Department</a>
                                     <form method="post" onsubmit="return confirm('Delete this department?')">
+                                        <?php echo csrf_field(); ?>
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="department_id" value="<?php echo (int)$department['department_id']; ?>">
                                         <button class="btn btn-secondary btn-small danger-outline" type="submit">Delete</button>
@@ -287,6 +293,7 @@ function department_value(?array $department, string $key): string
                                     <span class="mini">Add positions directly below</span>
                                 </div>
                                 <form method="post" class="department-inline-position-form">
+                                    <?php echo csrf_field(); ?>
                                     <input type="hidden" name="action" value="save_position">
                                     <input type="hidden" name="position_department_id" value="<?php echo (int)$department['department_id']; ?>">
                                     <input type="text" name="position_name" maxlength="120" required placeholder="e.g. Instructor">
@@ -300,6 +307,7 @@ function department_value(?array $department, string $key): string
                                             <div class="position-chip">
                                                 <div><strong><?php echo e($position['position_name']); ?></strong><span><?php echo (int)$position['employee_count']; ?> employee<?php echo (int)$position['employee_count'] === 1 ? '' : 's'; ?></span></div>
                                                 <form method="post" onsubmit="return confirm('Delete this position?')">
+                                                    <?php echo csrf_field(); ?>
                                                     <input type="hidden" name="action" value="delete_position">
                                                     <input type="hidden" name="position_id" value="<?php echo (int)$position['position_id']; ?>">
                                                     <button class="icon-action delete" type="submit" title="Delete position" aria-label="Delete position"><?php echo ui_icon('trash'); ?></button>
@@ -308,7 +316,7 @@ function department_value(?array $department, string $key): string
                                         <?php endforeach; ?>
                                     </div>
                                 <?php endif; ?>
-                            </div>
+                            </div></div>
                         </details>
                     <?php endforeach; endif; ?>
                 </div>

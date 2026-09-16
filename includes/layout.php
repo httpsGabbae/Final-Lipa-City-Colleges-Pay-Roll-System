@@ -29,8 +29,17 @@ function ui_icon(string $name, string $class = ''): string
     return '<svg class="ui-icon ' . e($class) . '" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' . $path . '</svg>';
 }
 
+/* Pre-paint state: runs synchronously where sidebar() is echoed (first body
+   output), so mobile never flashes the expanded drawer before the deferred
+   app.js applies the saved rail state. Idempotent with app.js. */
+function early_paint_state(): void
+{
+    echo '<script>try{var _b=document.body,_m=window.matchMedia("(max-width: 820px)").matches;if(_m){if(localStorage.getItem("lccMobileSidebarExpanded")!=="true")_b.classList.add("sidebar-collapsed");}else if(localStorage.getItem("lccSidebarCollapsed")==="true")_b.classList.add("sidebar-collapsed");if(localStorage.getItem("lccTheme")==="dark")_b.classList.add("dark-mode");}catch(_e){}</script>';
+}
+
 function sidebar(string $active): void
 {
+    early_paint_state();
     $items = [
         ['dashboard', 'dashboard', 'Dashboard', '../pages/admin_dashboard.php'],
         ['employees', 'users', 'Employees', '../pages/employees.php'],
@@ -105,6 +114,7 @@ function topbar(string $title): void
     echo '<div class="settings-body">';
     echo '<div class="settings-section"><h3>Change Password</h3><p>Change the password for the currently signed-in administrator.</p></div>';
     echo '<form id="changePasswordForm" method="post" action="../auth/change_password.php" autocomplete="off">';
+    echo csrf_field();
     echo '<label>Current Password<input type="password" name="current_password" required></label>';
     echo '<label>New Password<input type="password" name="new_password" minlength="8" required><small>Use at least 8 characters.</small></label>';
     echo '<label>Confirm New Password<input type="password" name="confirm_password" minlength="8" required></label>';

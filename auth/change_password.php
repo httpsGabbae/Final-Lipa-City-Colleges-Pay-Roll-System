@@ -5,6 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../pages/admin_dashboard.php');
     exit;
 }
+require_csrf();
 
 $current = $_POST['current_password'] ?? '';
 $new = $_POST['new_password'] ?? '';
@@ -45,5 +46,6 @@ if (!$stmt->execute()) {
     exit;
 }
 
+session_regenerate_id(true);
 header('Location: ../pages/admin_dashboard.php?password_changed=1');
 exit;

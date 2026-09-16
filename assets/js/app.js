@@ -1,11 +1,37 @@
+/* Apple Design System bootstrap — loads after app.css so it wins the cascade. */
+(function () {
+    function base() {
+        var s = document.querySelector('script[src*="assets/js/app.js"]');
+        if (s && s.src) return s.src.split('assets/js/app.js')[0] + 'assets/';
+        return '../assets/';
+    }
+    var root = base();
+    if (!document.querySelector('link[data-apple-system]')) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = root + 'css/apple-system.css?v=20260916-apple7';
+        link.setAttribute('data-apple-system', '1');
+        document.head.appendChild(link);
+    }
+    if (!document.querySelector('script[data-apple-motion]')) {
+        var sc = document.createElement('script');
+        sc.src = root + 'js/apple-motion.js?v=20260916-apple1';
+        sc.defer = true;
+        sc.setAttribute('data-apple-motion', '1');
+        document.head.appendChild(sc);
+    }
+})();
+
 document.addEventListener('DOMContentLoaded', function () {
     const body = document.body;
     const sidebar = document.getElementById('appSidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    const adminButton = document.getElementById('adminMenuButton');
-    const adminDropdown = document.getElementById('adminDropdown');
+    // ID-first with class fallback: the employee portal topbar reuses the
+    // same classes without the admin IDs, and its menu must work too.
+    const themeToggle = document.getElementById('themeToggle') || document.querySelector('.theme-toggle');
+    const themeIcon = document.getElementById('themeIcon') || (themeToggle ? themeToggle.querySelector('#themeIcon, span') : null);
+    const adminButton = document.getElementById('adminMenuButton') || document.querySelector('.admin-chip');
+    const adminDropdown = document.getElementById('adminDropdown') || document.querySelector('.admin-menu .admin-dropdown');
     const settingsOverlay = document.getElementById('settingsOverlay');
     const openSettings = document.getElementById('openSettings');
     const closeSettings = document.getElementById('closeSettings');
@@ -173,7 +199,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (event.target === settingsOverlay) closeSettingsModal();
     });
     document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') closeSettingsModal();
+        if (event.key === 'Escape') {
+            closeSettingsModal();
+            adminDropdown?.classList.remove('show');
+            adminButton?.setAttribute('aria-expanded', 'false');
+            closeMobileMore();
+        }
     });
 
     passwordForm?.addEventListener('submit', function (event) {

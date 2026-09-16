@@ -1,7 +1,21 @@
 <?php
 
-require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/pdf.php';
+
+if (!function_exists('employee_name')) {
+    function employee_name(array $employee): string
+    {
+        return trim($employee['first_name'] . ' ' . ($employee['middle_name'] ?? '') . ' ' . $employee['last_name']);
+    }
+}
+
+$isAdmin = !empty($_SESSION['admin_id']);
+$sessionEmployeeId = (int)($_SESSION['employee_id'] ?? 0);
+if (!$isAdmin && $sessionEmployeeId <= 0) {
+    header('Location: ../pages/login.php');
+    exit;
+}
 
 $id = (int)($_GET['id'] ?? 0);
 
@@ -9,8 +23,13 @@ if ($id <= 0) {
     exit('Payroll record not found.');
 }
 
-$stmt = $conn->prepare('SELECT p.*, e.employee_no, e.first_name, e.middle_name, e.last_name, e.department, e.position FROM payroll_records p JOIN employees e ON e.employee_id=p.employee_id WHERE p.payroll_id=? LIMIT 1');
-$stmt->bind_param('i', $id);
+if ($isAdmin) {
+    $stmt = $conn->prepare('SELECT p.*, e.employee_no, e.first_name, e.middle_name, e.last_name, e.department, e.position FROM payroll_records p JOIN employees e ON e.employee_id=p.employee_id WHERE p.payroll_id=? LIMIT 1');
+    $stmt->bind_param('i', $id);
+} else {
+    $stmt = $conn->prepare('SELECT p.*, e.employee_no, e.first_name, e.middle_name, e.last_name, e.department, e.position FROM payroll_records p JOIN employees e ON e.employee_id=p.employee_id WHERE p.payroll_id=? AND p.employee_id=? LIMIT 1');
+    $stmt->bind_param('ii', $id, $sessionEmployeeId);
+}
 $stmt->execute();
 $payroll = $stmt->get_result()->fetch_assoc();
 
@@ -27,6 +46,7 @@ class PayslipPDF extends FPDF
 }
 
 $pdf = new PayslipPDF('P', 'mm', 'A4');
+$pdf->AliasNbPages();
 $pdf->SetMargins(15, 12, 15);
 $pdf->SetAutoPageBreak(true, 18);
 $pdf->AddPage();

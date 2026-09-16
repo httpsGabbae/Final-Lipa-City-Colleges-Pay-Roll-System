@@ -233,6 +233,6 @@ function pdf_footer(FPDF $pdf, string $text): void
     $pdf->SetY(-12);
     $pdf->SetFont('Arial', '', 7);
     $pdf->SetTextColor(110, 123, 128);
-    $pdf->Cell(0, 6, pdf_text($text . ' | Page ' . $pdf->PageNo()), 0, 0, 'C');
+    $pdf->Cell(0, 6, pdf_text($text . ' | Page ' . $pdf->PageNo() . ' of {nb}'), 0, 0, 'C');
     $pdf->SetTextColor(23, 50, 59);
 }

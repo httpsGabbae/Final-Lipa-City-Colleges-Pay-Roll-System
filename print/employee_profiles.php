@@ -56,6 +56,7 @@ function render_employee_profile(FPDF $pdf, array $employee): void
 }
 
 $pdf = new EmployeeProfilesPDF('P', 'mm', 'A4');
+$pdf->AliasNbPages();
 $pdf->SetMargins(15, 10, 15);
 $pdf->SetAutoPageBreak(true, 16);
 

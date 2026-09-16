@@ -31,7 +31,7 @@ class EmployeeListPDF extends FPDF
         $this->SetY(-12);
         $this->SetFont('Arial', '', 7);
         $this->SetTextColor(110, 123, 128);
-        $this->Cell(0, 6, pdf_text('Employee Directory | Page ' . $this->PageNo()), 0, 0, 'C');
+        $this->Cell(0, 6, pdf_text('Employee Directory | Page ' . $this->PageNo() . ' of {nb}'), 0, 0, 'C');
     }
 }
 
@@ -117,6 +117,7 @@ function employee_list_row(FPDF $pdf, array $row): void
 }
 
 $pdf = new EmployeeListPDF('P', 'mm', 'A4');
+$pdf->AliasNbPages();
 $pdf->SetMargins(15, 12, 15);
 $pdf->SetAutoPageBreak(true, 18);
 $pdf->AddPage();

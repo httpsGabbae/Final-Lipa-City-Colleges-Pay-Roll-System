@@ -10,14 +10,17 @@
 <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>LCC Payroll System</title>
     <link rel="stylesheet" href="../assets/css/login.css">
+    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7">
+    <script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 </head>
 
 <body>
+<script>try{if(localStorage.getItem("lccTheme")==="dark")document.body.classList.add("dark-mode");}catch(_e){}</script>
     <section class="brand-side">
         <div class="brand-content"><img class="login-logo" src="../uploads/logo1.jpg" alt="Company Logo">
             <div class="eyebrow" style="color:#b8f1ee">LCC Payroll System</div>
-            <h1>Employee & Payroll Management</h1>
-            <p>Lipa City Colleges payroll system.</p>
+            <h1>Payroll that feels effortless.</h1>
+            <p>One calm workspace for people, attendance, and pay — accurate to the peso, ready to print, kind to every screen.</p>
         </div>
     </section>
     <section class="login-side">

@@ -2,8 +2,10 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/layout.php';
 
-if (isset($_GET['delete'])) {
-    $deleteId = (int)$_GET['delete'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
+    require_csrf();
+    $deleteId = (int)($_POST['employee_id'] ?? 0);
+    if ($deleteId > 0) {
     $stmt = $conn->prepare('SELECT photo_path FROM employees WHERE employee_id=? LIMIT 1');
     $stmt->bind_param('i', $deleteId);
     $stmt->execute();
@@ -14,6 +16,7 @@ if (isset($_GET['delete'])) {
     $stmt->execute();
 
     if ($row) delete_employee_photo($row['photo_path']);
+    }
 
     header('Location: employees.php?deleted=1');
     exit;
@@ -76,7 +79,9 @@ if ($recent) while ($r = $recent->fetch_assoc()) $recentEmployees[] = $r;
 <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>LCC Payroll System</title>
     <link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4">
-    <script src="../assets/js/app.js?v=20260909-rail4" defer></script>
+    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7">
+    <script src="../assets/js/app.js?v=20260916-rail5" defer></script>
+    <script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 </head>
 <body>
 <div class="app">
@@ -133,13 +138,13 @@ if ($recent) while ($r = $recent->fetch_assoc()) $recentEmployees[] = $r;
                                 <td><span class="employee-no"><?php echo e($row['employee_no']); ?></span></td>
                                 <td><?php echo e($row['department'] ?: 'Not assigned'); ?></td>
                                 <td><?php echo e($row['position'] ?: 'Not assigned'); ?></td>
-                                <td><span class="badge"><?php echo e($row['employment_status']); ?></span></td>
+                                <td><span class="badge <?php echo ['Regular' => 'badge-ok', 'Probationary' => 'badge-info', 'Contractual' => 'badge-violet', 'Part-Time' => 'badge-neutral'][$row['employment_status']] ?? 'badge-neutral'; ?>"><?php echo e($row['employment_status']); ?></span></td>
                                 <td class="action-col">
                                     <div class="icon-actions">
                                         <button type="button" class="icon-action view" title="View employee record" aria-label="View employee record" onclick="openEmployeePreview(<?php echo (int)$row['employee_id']; ?>)"><?php echo ui_icon('eye'); ?></button>
-                                        <button type="button" class="icon-action salary" title="View salary information" aria-label="View salary information" onclick="openSalaryModal(<?php echo (int)$row['employee_id']; ?>)"><?php echo ui_icon('wallet'); ?></button><a class="icon-action" title="Open employee portal" aria-label="Open employee portal" href="../employee/login.php?employee=<?php echo urlencode($row['employee_no']); ?>" target="_blank">↗</a>
+                                        <button type="button" class="icon-action salary" title="View salary information" aria-label="View salary information" onclick="openSalaryModal(<?php echo (int)$row['employee_id']; ?>)"><?php echo ui_icon('wallet'); ?></button><form method="post" action="../employee/login.php" target="_blank" style="display:inline"><?php echo csrf_field(); ?><input type="hidden" name="action" value="admin_preview"><input type="hidden" name="employee_no" value="<?php echo e($row['employee_no']); ?>"><button type="submit" class="icon-action" title="Open employee portal" aria-label="Open employee portal">↗</button></form>
                                         <a class="icon-action edit" title="Edit employee" aria-label="Edit employee" href="personalinfo.php?edit=<?php echo (int)$row['employee_id']; ?>"><?php echo ui_icon('pencil'); ?></a>
-                                        <a class="icon-action delete" title="Delete employee" aria-label="Delete employee" href="employees.php?delete=<?php echo (int)$row['employee_id']; ?>" onclick="return confirm('Delete this employee? This cannot be undone.')"><?php echo ui_icon('trash'); ?></a>
+                                        <form method="post" action="employees.php" style="display:inline" onsubmit="return confirm('Delete this employee? This cannot be undone.')"><?php echo csrf_field(); ?><input type="hidden" name="action" value="delete"><input type="hidden" name="employee_id" value="<?php echo (int)$row['employee_id']; ?>"><button type="submit" class="icon-action delete" title="Delete employee" aria-label="Delete employee"><?php echo ui_icon('trash'); ?></button></form>
                                     </div>
                                 </td>
                             </tr>

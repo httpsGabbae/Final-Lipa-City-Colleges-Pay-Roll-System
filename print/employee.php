@@ -53,6 +53,8 @@ $pdf = new EmployeePDF(
     'A4'
 );
 
+$pdf->AliasNbPages();
+
 $pdf->SetMargins(
     15,
     10,
