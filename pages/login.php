@@ -33,6 +33,7 @@
     </section>
 </body>
 
+<<<<<<< HEAD
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://itosrfgbssujeulqbmuy.supabase.co";
@@ -41,3 +42,6 @@
         
     </script>
 </html>
+=======
+</html>
+>>>>>>> 1ed14301d9765b97cff1fb5bb598e017dca319a3
