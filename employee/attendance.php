@@ -63,7 +63,7 @@ $history = $historyStmt->get_result();
 ?>
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- FAVICON: Put your favicon file at /assets/favicon.png (replace the included LCC placeholder if desired). -->
-<link rel="icon" type="image/png" href="../assets/favicon.png"><title>LCC Payroll System</title><link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><link rel="stylesheet" href="../assets/css/employee.css"><link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7"><script src="../assets/js/app.js?v=20260916-rail5" defer></script><script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script></head>
+<link rel="icon" type="image/png" href="../assets/favicon.png"><title>LCC Payroll System</title><link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><link rel="stylesheet" href="../assets/css/employee.css"><link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9"><script src="../assets/js/app.js?v=20260916-rail5" defer></script><script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script></head>
 <body><div class="app"><?php employee_sidebar('attendance'); ?><main class="main"><?php employee_topbar('Attendance'); ?><div class="content">
 <div class="page-heading"><div><div class="eyebrow">EMPLOYEE PORTAL</div><h1>Attendance</h1><p>Record your daily attendance with one click.</p></div></div>
 <?php if($message): ?><div class="notice ok"><?php echo e($message); ?></div><?php endif; ?><?php if($error): ?><div class="notice err"><?php echo e($error); ?></div><?php endif; ?>

@@ -66,7 +66,7 @@ $attentionText = $issues ? implode(' · ', array_column($issues, 1)) : 'All clea
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="icon" type="image/png" href="../assets/favicon.png"><title>LCC Payroll System</title>
-<link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7"><script src="../assets/js/app.js?v=20260916-rail5" defer></script><script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
+<link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9"><script src="../assets/js/app.js?v=20260916-rail5" defer></script><script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 </head><body><div class="app">
 <?php sidebar('dashboard'); ?><main class="main"><?php topbar('Dashboard'); ?><div class="content">
 <section class="card dash-greet">

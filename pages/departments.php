@@ -171,7 +171,7 @@ function department_value(?array $department, string $key): string
 <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>LCC Payroll System</title>
     <link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4">
-    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7">
+    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9">
     <script src="../assets/js/app.js?v=20260916-rail5" defer></script>
     <script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 <style>
@@ -259,8 +259,8 @@ function department_value(?array $department, string $key): string
                     <?php if (!$departments): ?>
                         <div class="empty">No departments have been added yet.</div>
                     <?php else: foreach ($departments as $department): ?>
-                        <?php $deptPositions = $departmentPositions[(int)$department['department_id']] ?? []; $deptTone = abs(crc32((string)$department['department_name'])) % 8 + 1; ?>
-                        <details class="department-collapsible" style="--dept-c:var(--dept-<?php echo $deptTone; ?>);--dept-c-soft:var(--dept-<?php echo $deptTone; ?>-soft)">
+                        <?php $deptPositions = $departmentPositions[(int)$department['department_id']] ?? []; $deptKey = dept_color_key($department['department_code'] ?? '', $department['department_name'] ?? ''); ?>
+                        <details class="department-collapsible" style="--dept-c:var(--c-<?php echo $deptKey; ?>);--dept-c-soft:var(--c-<?php echo $deptKey; ?>-soft)">
                             <summary class="department-collapsible-summary">
                                 <div class="department-summary-main">
                                     <span class="dept-dot" aria-hidden="true"></span>

@@ -95,3 +95,27 @@ if ($conn->connect_errno) {
 $conn->set_charset('utf8mb4');
 // Keep database dates/times aligned with the application's Philippines timezone.
 @$conn->query("SET time_zone = '+08:00'");
+
+if (!function_exists('dept_color_key')) {
+    /* Department identity color key shared by every surface (directory,
+       report bars, badges). Codes win; names are the fallback so Free-text
+       department values still resolve. Unknown => 'default' (brand teal). */
+    function dept_color_key(?string $code, ?string $name): string
+    {
+        $codeKey = strtoupper(preg_replace('/[^A-Z0-9]/', '', (string)$code));
+        $byCode = [
+            'BSA' => 'bsa', 'CCTE' => 'ccte', 'CCJE' => 'ccje',
+            'CBA' => 'cba', 'CITHM' => 'cithm', 'CITM' => 'cithm',
+            'CON' => 'nursing', 'CELA' => 'cela',
+        ];
+        if (isset($byCode[$codeKey])) return $byCode[$codeKey];
+        $n = strtoupper((string)$name);
+        if (strpos($n, 'NURSING') !== false) return 'nursing';
+        if (strpos($n, 'COMPUTING') !== false) return 'ccte';
+        if (strpos($n, 'CRIMINAL') !== false) return 'ccje';
+        if (strpos($n, 'BUSINESS') !== false) return 'cba';
+        if (strpos($n, 'TOURISM') !== false || strpos($n, 'HOSPITALITY') !== false) return 'cithm';
+        if (strpos($n, 'EDUCATION') !== false || strpos($n, 'LIBERAL') !== false) return 'cela';
+        return 'default';
+    }
+}

@@ -1038,14 +1038,15 @@ input[type="file"] { padding: 8px 12px !important; height: auto !important; min-
   --info: #2f7fc4; --info-soft: rgba(47, 127, 196, 0.12);
   --violet: #7c5fc0; --violet-soft: rgba(124, 95, 192, 0.13);
   --neutral: #64777d; --neutral-soft: rgba(100, 119, 125, 0.14);
-  --dept-1: #0f9f9a; --dept-1-soft: rgba(15, 159, 154, 0.13);
-  --dept-2: #2f7fc4; --dept-2-soft: rgba(47, 127, 196, 0.13);
-  --dept-3: #7c5fc0; --dept-3-soft: rgba(124, 95, 192, 0.14);
-  --dept-4: #c2920a; --dept-4-soft: rgba(194, 146, 10, 0.15);
-  --dept-5: #d9626e; --dept-5-soft: rgba(217, 98, 110, 0.13);
-  --dept-6: #2f9e68; --dept-6-soft: rgba(47, 158, 104, 0.13);
-  --dept-7: #1f9ebb; --dept-7-soft: rgba(31, 158, 187, 0.13);
-  --dept-8: #cf6f2e; --dept-8-soft: rgba(207, 111, 46, 0.14);
+  /* Named department identity hues (one meaning per department) */
+  --c-bsa: #c2920a; --c-bsa-soft: rgba(194, 146, 10, 0.15);
+  --c-ccte: #cf6f2e; --c-ccte-soft: rgba(207, 111, 46, 0.14);
+  --c-ccje: #d63d3d; --c-ccje-soft: rgba(214, 61, 61, 0.12);
+  --c-cba: #2f7fc4; --c-cba-soft: rgba(47, 127, 196, 0.13);
+  --c-cithm: #d63d3d; --c-cithm-soft: rgba(214, 61, 61, 0.12);
+  --c-nursing: #2f9e68; --c-nursing-soft: rgba(47, 158, 104, 0.13);
+  --c-cela: #7c5fc0; --c-cela-soft: rgba(124, 95, 192, 0.14);
+  --c-default: #0f9f9a; --c-default-soft: rgba(15, 159, 154, 0.13);
 }
 body.dark-mode {
   --ok: #4cc38a; --ok-soft: rgba(76, 195, 138, 0.15);
@@ -1054,6 +1055,8 @@ body.dark-mode {
   --info: #6ea8e0; --info-soft: rgba(110, 168, 224, 0.15);
   --violet: #a98fe0; --violet-soft: rgba(169, 143, 224, 0.16);
   --neutral: #9fb3b8; --neutral-soft: rgba(159, 179, 184, 0.16);
+  --c-bsa: #e3b341; --c-ccte: #e08a4c; --c-ccje: #ef6b6b; --c-cba: #6ea8e0;
+  --c-cithm: #ef6b6b; --c-nursing: #4cc38a; --c-cela: #a98fe0; --c-default: #2dd4bf;
 }
 
 /* Badges speak their status */
@@ -1076,7 +1079,7 @@ body.dark-mode .danger-outline { color: #ef9a9a !important; border-color: rgba(1
   background: var(--dept-c-soft, rgba(15, 159, 154, 0.12)) !important;
   color: var(--dept-c, #087f7b) !important;
   border-color: transparent !important;
-  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s ease !important;
+  transition: transform 0.22s cubic-bezier(0.32, 0.72, 0, 1), background 0.2s ease !important;
 }
 .department-collapsible[open] {
   box-shadow: inset 3px 0 0 var(--dept-c, #0f9f9a), var(--shadow-sm) !important;
@@ -1094,6 +1097,22 @@ body.dark-mode .position-chip {
 .bar i { background: var(--dept-c, var(--accent)) !important; }
 
 /* ==========================================================================
+   SCROLLBARS — quiet everywhere. Thin neutral thumbs, transparent tracks,
+   no layout shift. Scrolling still works; only the visual noise is gone.
+   (Content taller than the viewport must scroll — the alternative would be
+   cutting content or paging, which is worse. Nothing nested scrolls that
+   shouldn't: tables keep their touch scroll, modals keep theirs.)
+   ========================================================================== */
+* { scrollbar-width: thin; scrollbar-color: rgba(130, 150, 158, 0.5) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(130, 150, 158, 0.38); border-radius: 99px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(130, 150, 158, 0.6); }
+body.dark-mode * { scrollbar-color: rgba(159, 179, 184, 0.4) transparent; }
+body.dark-mode *::-webkit-scrollbar-thumb { background: rgba(159, 179, 184, 0.32); }
+body.dark-mode *::-webkit-scrollbar-thumb:hover { background: rgba(159, 179, 184, 0.55); }
+
+/* ==========================================================================
    DEPARTMENT DROPDOWN — smooth expand/collapse via grid rows (no height
    hacks, no JS needed), plus stacking on narrow screens. The inner clip
    keeps tall content collapsible; padding/border ride along so nothing
@@ -1105,9 +1124,9 @@ body.dark-mode .position-chip {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   border-top: 0 !important;
-  transition: grid-template-rows 0.45s cubic-bezier(0.32, 0.72, 0, 1),
-    padding 0.45s cubic-bezier(0.32, 0.72, 0, 1),
-    border-color 0.3s ease !important;
+  transition: grid-template-rows 0.25s cubic-bezier(0.32, 0.72, 0, 1),
+    padding 0.25s cubic-bezier(0.32, 0.72, 0, 1),
+    border-color 0.2s ease !important;
 }
 details.department-collapsible[open] .department-collapsible-body {
   grid-template-rows: 1fr;
@@ -1125,4 +1144,89 @@ details.department-collapsible[open] .department-collapsible-body {
   .department-actions .btn { flex: 1 1 140px !important; }
   .department-inline-position-form { display: grid !important; gap: 8px !important; }
   .position-chip-list { grid-template-columns: 1fr !important; }
+}
+
+/* ==========================================================================
+   EMPLOYEE DASHBOARD — same sketch language as admin: greeting banner,
+   identity card, three stacked rows. Motion follows the design-eng
+   framework: UI entrances under ~300ms, ease-out, short staggers.
+   ========================================================================== */
+.dash-id-person { display: flex; align-items: center; gap: 14px; margin-top: 14px; min-width: 0; }
+.dash-id-person .portal-photo, .dash-id-person .portal-avatar {
+  width: 60px !important; height: 60px !important;
+  border-radius: 16px !important; flex: 0 0 60px !important;
+}
+.dash-id-person strong { display: block; font-size: 17px !important; letter-spacing: -0.01em !important; }
+.dash-id-person span {
+  display: block; color: var(--muted); font-size: 12px !important;
+  margin-top: 2px; font-variant-numeric: tabular-nums;
+}
+.dash-progress {
+  height: 8px; border-radius: 99px; overflow: hidden;
+  background: rgba(130, 150, 158, 0.2); margin-top: 14px;
+}
+.dash-progress i {
+  display: block; height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), #49bdb7);
+}
+.dash-progress-note { color: var(--muted); font-size: 12px !important; margin-top: 8px; }
+.dash-row-action { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.dash-row-action form { margin: 0; }
+@media (max-width: 560px) {
+  .dash-row { flex-wrap: wrap !important; }
+  .dash-row-action { width: 100%; margin-left: 0; }
+  .dash-row-action .btn, .dash-row-action form { flex: 1; }
+  .dash-row-action .btn { width: 100%; }
+}
+
+/* ==========================================================================
+   LOGIN — mobile brand mark (brand-side is hidden ≤800px, so the card
+   carries the logo) + a portal link that reads as a real button.
+   ========================================================================== */
+.login-mobile-brand { display: none; }
+@media (max-width: 800px) {
+  .login-mobile-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+  .login-mobile-brand img {
+    width: 46px; height: 46px; border-radius: 13px; object-fit: contain;
+    background: #fff; padding: 3px;
+    box-shadow: 0 6px 16px rgba(15, 48, 57, 0.16);
+    flex: 0 0 46px;
+  }
+  .login-mobile-brand strong { display: block; font-size: 13px; letter-spacing: 0.08em; }
+  .login-mobile-brand span { display: block; font-size: 10px; color: var(--muted); margin-top: 2px; }
+}
+.portal-link {
+  display: flex !important; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; box-sizing: border-box;
+  margin-top: 16px !important; padding: 13px 14px !important;
+  border-radius: 12px !important;
+  background: rgba(15, 159, 154, 0.08) !important;
+  border: 1px solid rgba(15, 159, 154, 0.28) !important;
+  color: var(--accent-dark) !important;
+  font-size: 13px !important; font-weight: 800 !important;
+  transition: transform 100ms ease-out, background 180ms ease !important;
+}
+.portal-link:hover { background: rgba(15, 159, 154, 0.14) !important; transform: translateY(-1px); }
+.portal-link:active { transform: scale(0.98) !important; }
+.portal-link span {
+  width: 24px; height: 24px; border-radius: 8px;
+  display: grid !important; place-items: center;
+  background: rgba(15, 159, 154, 0.14);
+  font-size: 14px;
+}
+body.dark-mode .portal-link {
+  background: rgba(45, 212, 191, 0.1) !important;
+  border-color: rgba(45, 212, 191, 0.3) !important;
+  color: #7fe0da !important;
+}
+body.dark-mode .portal-link:hover { background: rgba(45, 212, 191, 0.16) !important; }
+body.dark-mode .portal-link span { background: rgba(45, 212, 191, 0.14); }
+
+/* Touch devices: no lift on hover (kills sticky-hover), keep color shifts */
+@media (hover: none) {
+  .dash-row:hover, .quick-action:hover, .report-shortcut:hover,
+  .btn-primary:hover, .login-card button[type="submit"]:hover,
+  .portal-link:hover, .icon-action:hover {
+    transform: none !important;
+  }
 }

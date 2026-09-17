@@ -9,7 +9,7 @@
     if (!document.querySelector('link[data-apple-system]')) {
         var link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = root + 'css/apple-system.css?v=20260916-apple7';
+        link.href = root + 'css/apple-system.css?v=20260916-apple9';
         link.setAttribute('data-apple-system', '1');
         document.head.appendChild(link);
     }

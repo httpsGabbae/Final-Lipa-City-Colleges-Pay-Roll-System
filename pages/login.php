@@ -10,7 +10,7 @@
 <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>LCC Payroll System</title>
     <link rel="stylesheet" href="../assets/css/login.css">
-    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7">
+    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9">
     <script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 </head>
 
@@ -25,6 +25,7 @@
     </section>
     <section class="login-side">
         <div class="login-card">
+            <div class="login-mobile-brand"><img src="../uploads/logo1.jpg" alt="LCC logo"><div><strong>LCC PAYROLL</strong><span>Administrator Sign In</span></div></div>
             <div class="eyebrow">Administrator</div>
             <h2>Welcome back</h2>
             <p class="hint">Sign in to open the payroll dashboard.</p><?php if (isset($_GET["error"])): ?><div class="error" role="alert">Incorrect username or password.</div><?php endif; ?><form method="post" action="../auth/login.php"><label>Username</label><input type="text" name="username" autocomplete="username" required><label>Password</label><input type="password" name="password" autocomplete="current-password" required><button type="submit">Sign In</button></form><a class="portal-link" href="../employee/login.php">Employee Portal <span>→</span></a>
@@ -32,4 +33,11 @@
     </section>
 </body>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://itosrfgbssujeulqbmuy.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_xp4JIfu-MGhbSFIRcKCW8A_qMYkhQ1Z";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+    </script>
 </html>

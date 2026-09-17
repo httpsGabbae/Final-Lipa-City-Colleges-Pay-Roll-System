@@ -112,7 +112,7 @@ $employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,b
 <link rel="icon" type="image/png" href="../assets/favicon.png">
     <title>LCC Payroll System</title>
     <link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4">
-    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple7">
+    <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9">
     <script src="../assets/js/app.js?v=20260916-rail5" defer></script>
     <script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 </head>
