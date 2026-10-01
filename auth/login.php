@@ -40,5 +40,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 
-header('Location: ../pages/login.php?error=1');
+header('Location: ../login.php?error=1');
 exit;

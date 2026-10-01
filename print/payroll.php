@@ -13,7 +13,7 @@ if (!function_exists('employee_name')) {
 $isAdmin = !empty($_SESSION['admin_id']);
 $sessionEmployeeId = (int)($_SESSION['employee_id'] ?? 0);
 if (!$isAdmin && $sessionEmployeeId <= 0) {
-    header('Location: ../pages/login.php');
+    header('Location: ../login.php');
     exit;
 }
 

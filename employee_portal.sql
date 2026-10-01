@@ -1,5 +1,5 @@
--- LCC Payroll System - Employee Portal patch
--- Run this on an EXISTING lcc_payroll database.
+-- Paywise - Employee Portal patch
+-- Run this on an EXISTING paywise_payroll database.
 -- The current schema already contains employees.portal_password.
 -- This patch only makes sure the column exists for older databases.
 

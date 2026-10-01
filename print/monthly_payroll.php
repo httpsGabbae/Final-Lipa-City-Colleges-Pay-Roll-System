@@ -66,7 +66,7 @@ class MonthlyPayrollPDF extends FPDF
         $this->SetXY(45, 11);
         $this->SetFont('Arial', 'B', 17);
         $this->SetTextColor(6, 59, 70);
-        $this->Cell(0, 7, pdf_text('LCC PAYROLL SYSTEM'), 0, 1, 'L');
+        $this->Cell(0, 7, pdf_text('PAYWISE'), 0, 1, 'L');
         $this->SetX(45);
         $this->SetFont('Arial', 'B', 10);
         $this->SetTextColor(15, 127, 123);
@@ -91,7 +91,7 @@ class MonthlyPayrollPDF extends FPDF
         $this->SetY(-12);
         $this->SetFont('Arial', '', 7);
         $this->SetTextColor(110, 123, 128);
-        $this->Cell(0, 6, pdf_text('Private and Confidential · LCC Payroll System · Page ' . $this->PageNo() . ' of {nb}'), 0, 0, 'C');
+        $this->Cell(0, 6, pdf_text('Private and Confidential · Paywise · Page ' . $this->PageNo() . ' of {nb}'), 0, 0, 'C');
     }
 }
 

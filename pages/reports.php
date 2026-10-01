@@ -47,8 +47,8 @@ foreach ($trend as $point) $trendMax = max($trendMax, $point['gross'], $point['n
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<!-- FAVICON: Put your favicon file at /assets/favicon.png (replace the included LCC placeholder if desired). -->
-<link rel="icon" type="image/png" href="../assets/favicon.png"><title>LCC Payroll System</title><link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9"><script src="../assets/js/app.js?v=20260916-rail5" defer></script><script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script></head>
+<!-- FAVICON: Put your favicon file at /assets/favicon.png -->
+<link rel="icon" type="image/png" href="../assets/favicon.png"><title>Paywise</title><link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9"><script src="../assets/js/app.js?v=20260916-rail5" defer></script><script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script></head>
 <body><div class="app">
 <?php sidebar('reports'); ?>
 <main class="main">
@@ -100,7 +100,7 @@ foreach ($trend as $point) $trendMax = max($trendMax, $point['gross'], $point['n
 
 <div id="reportPrintSheet" class="report-print-sheet">
     <div class="print-sheet-header">
-        <div class="print-sheet-brand">LCC PAYROLL SYSTEM</div>
+        <div class="print-sheet-brand">PAYWISE</div>
         <div class="print-sheet-title">MONTHLY PAYROLL REPORT</div>
         <div class="print-sheet-subtitle"><?php echo e(date('F Y', strtotime($monthStart))); ?> · Payroll Period Register</div>
     </div>
@@ -126,6 +126,6 @@ foreach ($trend as $point) $trendMax = max($trendMax, $point['gross'], $point['n
         </div>
     </div>
     <div class="print-sheet-sign"><span>Prepared by: ______________________________</span><span>Date: <?php echo e(date('M d, Y')); ?></span></div>
-    <div class="print-sheet-footer">Private and Confidential · LCC Payroll System</div>
+    <div class="print-sheet-footer">Private and Confidential · Paywise</div>
 </div>
 </body></html>

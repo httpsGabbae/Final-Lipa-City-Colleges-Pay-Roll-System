@@ -34,7 +34,7 @@ function ui_icon(string $name, string $class = ''): string
    app.js applies the saved rail state. Idempotent with app.js. */
 function early_paint_state(): void
 {
-    echo '<script>try{var _b=document.body,_m=window.matchMedia("(max-width: 820px)").matches;if(_m){if(localStorage.getItem("lccMobileSidebarExpanded")!=="true")_b.classList.add("sidebar-collapsed");}else if(localStorage.getItem("lccSidebarCollapsed")==="true")_b.classList.add("sidebar-collapsed");if(localStorage.getItem("lccTheme")==="dark")_b.classList.add("dark-mode");}catch(_e){}</script>';
+    echo '<script>try{var _b=document.body,_m=window.matchMedia("(max-width: 820px)").matches;if(_m){if(localStorage.getItem("paywiseMobileSidebarExpanded")!=="true")_b.classList.add("sidebar-collapsed");}else if(localStorage.getItem("paywiseSidebarCollapsed")==="true")_b.classList.add("sidebar-collapsed");if(localStorage.getItem("paywiseTheme")==="dark")_b.classList.add("dark-mode");}catch(_e){}</script>';
 }
 
 function sidebar(string $active): void
@@ -53,8 +53,8 @@ function sidebar(string $active): void
     echo '<aside class="sidebar" id="appSidebar">';
     echo '<button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Collapse sidebar" title="Collapse sidebar">' . ui_icon('arrow-left') . '</button>';
     echo '<a class="brand" href="../pages/admin_dashboard.php">';
-    echo '<img class="brand-logo" src="../uploads/logo.png" alt="LCC Payroll">';
-    echo '<div class="brand-text"><div class="brand-title">LCC PAYROLL</div><div class="brand-sub">EMPLOYEE SYSTEM</div></div>';
+    echo '<img class="brand-logo" src="../uploads/logo.png" alt="Paywise">';
+    echo '<div class="brand-text"><div class="brand-title">PAYWISE</div><div class="brand-sub">EMPLOYEE SYSTEM</div></div>';
     echo '</a>';
 
     echo '<nav class="nav">';
@@ -147,7 +147,7 @@ function tutorial(): void
             </div>
 
             <h2>
-                Welcome to LCC Payroll!
+                Welcome to Paywise!
             </h2>
 
             <p>
@@ -436,7 +436,7 @@ function tutorial(): void
             }
 
             localStorage.setItem(
-                'lccPayrollTutorialCompleted',
+                'paywiseTutorialCompleted',
                 'true'
             );
         }
@@ -469,7 +469,7 @@ function tutorial(): void
 
                 const completed =
                     localStorage.getItem(
-                        'lccPayrollTutorialCompleted'
+                        'paywiseTutorialCompleted'
                     );
 
 

@@ -79,7 +79,7 @@ $pdf->AddPage();
 $pdf->SetXY(15, 10);
 $pdf->SetFont('Arial', 'B', 15);
 $pdf->SetTextColor(6, 59, 70);
-$pdf->Cell(105, 7, pdf_text('LCC PAYROLL SYSTEM'), 0, 0, 'L');
+$pdf->Cell(105, 7, pdf_text('PAYWISE'), 0, 0, 'L');
 
 $pdf->SetFont('Arial', '', 7);
 $pdf->SetTextColor(100, 115, 120);

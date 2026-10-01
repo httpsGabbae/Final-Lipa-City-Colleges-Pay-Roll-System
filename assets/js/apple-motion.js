@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LCC Payroll — Apple Motion (Emil Kowalski / Designing Fluid Interfaces)
+   Paywise — Apple Motion (Emil Kowalski / Designing Fluid Interfaces)
    Interruptible, velocity-aware springs for the web. No dependencies.
    - Response on pointer-down, continuous feedback during gesture
    - Springs animate from the live presentation value (interruptible)

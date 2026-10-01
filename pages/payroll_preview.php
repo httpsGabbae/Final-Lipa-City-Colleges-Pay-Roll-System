@@ -11,7 +11,7 @@ function pp_money($n){ return '₱ '.number_format((float)$n,2); }
 $name=trim($row['first_name'].' '.($row['middle_name']??'').' '.$row['last_name']);
 ?>
 <div class="native-payroll-statement">
-  <div class="native-print-brand">LCC PAYROLL SYSTEM</div>
+  <div class="native-print-brand">PAYWISE</div>
   <div class="native-print-kicker">PAYROLL STATEMENT</div>
   <div class="native-payroll-title">Employee Payroll Record</div>
   <div class="native-payroll-meta"><span>Employee ID: <strong><?=htmlspecialchars($row['employee_no'])?></strong></span><span>Status: <strong><?=htmlspecialchars($row['status'])?></strong></span></div>
@@ -27,5 +27,5 @@ $name=trim($row['first_name'].' '.($row['middle_name']??'').' '.$row['last_name'
   </div>
   <?php if(!empty($row['notes'])): ?><div class="native-pay-notes"><span>Notes</span><p><?=nl2br(htmlspecialchars($row['notes']))?></p></div><?php endif; ?>
   <div class="native-pay-sign"><span>Prepared by: __________________________</span><span>Date: <?=date('M d, Y')?></span></div>
-  <div class="native-print-footer">Private and Confidential · LCC Payroll System</div>
+  <div class="native-print-footer">Private and Confidential · Paywise</div>
 </div>

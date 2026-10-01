@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
         overlay.classList.remove("show");
 
         localStorage.setItem(
-            "lccPayrollTutorialCompleted",
+            "paywiseTutorialCompleted",
             "true"
         );
     }
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const tutorialCompleted =
         localStorage.getItem(
-            "lccPayrollTutorialCompleted"
+            "paywiseTutorialCompleted"
         );
 
 

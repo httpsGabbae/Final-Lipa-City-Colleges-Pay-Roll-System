@@ -41,9 +41,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const mobileQuery = window.matchMedia('(max-width: 820px)');
     const isMobile = () => mobileQuery.matches;
+    const savedSidebar = localStorage.getItem('paywiseSidebarCollapsed');
 
-    const savedSidebar = localStorage.getItem('lccSidebarCollapsed');
-    const savedMobileRail = localStorage.getItem('lccMobileSidebarExpanded');
+    const savedMobileRail = localStorage.getItem('paywiseMobileSidebarExpanded');
     if (isMobile()) {
         if (savedMobileRail !== 'true') body.classList.add('sidebar-collapsed');
     } else if (savedSidebar === 'true') {
@@ -75,9 +75,9 @@ document.addEventListener('DOMContentLoaded', function () {
         event.stopPropagation();
         body.classList.toggle('sidebar-collapsed');
         if (isMobile()) {
-            localStorage.setItem('lccMobileSidebarExpanded', body.classList.contains('sidebar-collapsed') ? 'false' : 'true');
+            localStorage.setItem('paywiseMobileSidebarExpanded', body.classList.contains('sidebar-collapsed') ? 'false' : 'true');
         } else {
-            localStorage.setItem('lccSidebarCollapsed', body.classList.contains('sidebar-collapsed'));
+            localStorage.setItem('paywiseSidebarCollapsed', body.classList.contains('sidebar-collapsed'));
         }
         updateSidebarButton();
     });
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
         link.addEventListener('click', function () {
             if (!isMobile()) return;
             const collapsed = body.classList.contains('sidebar-collapsed');
-            localStorage.setItem('lccMobileSidebarExpanded', collapsed ? 'false' : 'true');
+            localStorage.setItem('paywiseMobileSidebarExpanded', collapsed ? 'false' : 'true');
         }, true);
     });
 
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function handleViewportChange() {
-        if (isMobile() && localStorage.getItem('lccMobileSidebarExpanded') !== 'true') {
+        if (isMobile() && localStorage.getItem('paywiseMobileSidebarExpanded') !== 'true') {
             body.classList.add('sidebar-collapsed');
         }
         syncMobileSidebarState();
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
         mobileQuery.addListener(handleViewportChange);
     }
 
-    const savedTheme = localStorage.getItem('lccTheme');
+    const savedTheme = localStorage.getItem('paywiseTheme');
     if (savedTheme === 'dark') body.classList.add('dark-mode');
 
     function updateThemeIcon() {
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     themeToggle?.addEventListener('click', function () {
         body.classList.toggle('dark-mode');
-        localStorage.setItem('lccTheme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+        localStorage.setItem('paywiseTheme', body.classList.contains('dark-mode') ? 'dark' : 'light');
         updateThemeIcon();
     });
 
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!body.classList.contains('sidebar-collapsed')) {
             if (!event.target.closest('.sidebar') && !event.target.closest('.employee-sidebar')) {
                 body.classList.add('sidebar-collapsed');
-                localStorage.setItem('lccMobileSidebarExpanded', 'false');
+                localStorage.setItem('paywiseMobileSidebarExpanded', 'false');
                 updateSidebarButton();
             }
         }

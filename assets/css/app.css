@@ -1996,7 +1996,7 @@ body.dark-mode .trend-zoom-hint button:hover{background:#22343a}
 }
 
 /* ================================================================
-   LCC PAYROLL SYSTEM — V2 PRODUCT UI
+   PAYWISE — V2 PRODUCT UI
    Clean enterprise HR/payroll interface.  Existing functionality is
    preserved; these styles improve hierarchy, density and mobile UX.
    ================================================================ */
@@ -2710,7 +2710,7 @@ body{font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);letter-s
 }
 
 /* =====================================================================
-   LCC MOBILE RAIL — DEFINITIVE OVERRIDE
+   PAYWISE MOBILE RAIL — DEFINITIVE OVERRIDE
    Mobile keeps the desktop sidebar concept: expanded drawer + collapsed rail.
    The drawer overlays the page; it never squeezes or clips page content.
    ===================================================================== */

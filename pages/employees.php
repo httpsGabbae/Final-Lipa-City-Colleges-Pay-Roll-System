@@ -75,9 +75,9 @@ if ($recent) while ($r = $recent->fetch_assoc()) $recentEmployees[] = $r;
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<!-- FAVICON: Put your favicon file at /assets/favicon.png (replace the included LCC placeholder if desired). -->
+<!-- FAVICON: Put your favicon file at /assets/favicon.png -->
 <link rel="icon" type="image/png" href="../assets/favicon.png">
-    <title>LCC Payroll System</title>
+    <title>Paywise</title>
     <link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4">
     <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9">
     <script src="../assets/js/app.js?v=20260916-rail5" defer></script>

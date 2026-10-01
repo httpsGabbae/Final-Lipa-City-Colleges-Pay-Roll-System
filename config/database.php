@@ -86,9 +86,14 @@ if (!function_exists('require_csrf')) {
 $dbHost = 'localhost';
 $dbUser = 'root';
 $dbPass = '';
-$dbName = 'lcc_payroll';
+$dbName = 'paywise_payroll';
 
 $conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+// Fallback for existing installs still using the pre-rebrand database name.
+if ($conn->connect_errno && $conn->connect_errno === 1049) {
+    $dbName = 'lcc_payroll';
+    $conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+}
 if ($conn->connect_errno) {
     die('Database connection failed: ' . $conn->connect_error);
 }

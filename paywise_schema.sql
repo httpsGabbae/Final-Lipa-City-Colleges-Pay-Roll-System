@@ -1,16 +1,31 @@
 -- PAYWISE
--- Fresh / clean database schema
+-- Fresh / clean database schema (self-contained: creates the database too)
 -- MariaDB 10.4+ / MySQL 8+
 --
--- IMPORTANT:
--- 1. Create a NEW empty database (recommended), e.g. paywise_payroll_new.
--- 2. Select that database in phpMyAdmin.
--- 3. Import this file.
--- 4. Do NOT import this into the old database unless you intentionally want
---    to replace its existing tables and data.
+-- HOW TO USE (phpMyAdmin):
+-- 1. Open phpMyAdmin. You do NOT need to create anything first.
+-- 2. Click "Import", choose this file, click "Go".
+-- 3. Done: a `paywise_payroll` database is created with all tables,
+--    the default admin account, departments/positions, and the sample
+--    employee portal login below.
 --
--- This schema is based on the user's current database structure and adds
--- the employee/payroll tables required by the payroll system.
+-- IMPORTANT:
+-- Do NOT import this into an existing database unless you intentionally want
+-- to replace its existing tables and data (DROP TABLE statements below).
+--
+-- SAMPLE LOGINS after import:
+--   Admin:            username `admin` (password set during original install)
+--   Employee portal:  Employee ID `25-0001` / password `Employee@123`
+--
+-- This schema contains every table the payroll system needs:
+-- admins, app_settings, departments, positions, employees (with portal
+-- password + photo), attendance, employee_references, payroll_records.
+
+CREATE DATABASE IF NOT EXISTS `paywise_payroll`
+    DEFAULT CHARACTER SET utf8mb4
+    COLLATE utf8mb4_general_ci;
+
+USE `paywise_payroll`;
 
 SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
 SET time_zone = '+00:00';

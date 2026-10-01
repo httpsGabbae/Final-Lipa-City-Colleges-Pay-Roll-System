@@ -1,5 +1,5 @@
 -- ============================================================
--- LCC PAYROLL SYSTEM — PostgreSQL / Supabase schema
+-- PAYWISE — PostgreSQL / Supabase schema
 -- Converted from MySQL: schema.sql + attendance_portal.sql
 --   + employee_portal.sql (all three folded into this one file)
 --
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS public.app_settings (
 
 INSERT INTO public.app_settings (setting_key, setting_value) VALUES
 ('company_address', ''),
-('company_name', 'LCC Payroll System'),
+('company_name', 'Paywise'),
 ('employee_number_digits', '4'),
 ('employee_number_prefix', '25')
 ON CONFLICT (setting_key) DO NOTHING;

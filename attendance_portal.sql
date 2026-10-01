@@ -1,5 +1,5 @@
--- LCC Payroll System - Employee Portal + One-Click Attendance
--- Safe migration for an existing lcc_payroll database.
+-- Paywise - Employee Portal + One-Click Attendance
+-- Safe migration for an existing paywise_payroll database.
 
 ALTER TABLE employees
     ADD COLUMN IF NOT EXISTS portal_password VARCHAR(255) DEFAULT NULL AFTER employee_no;
