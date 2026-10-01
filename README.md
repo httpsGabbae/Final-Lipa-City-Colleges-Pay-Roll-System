@@ -1,6 +1,6 @@
-# LCC Payroll System — Product MVP
+# Paywise — Product MVP
 
-> **One-liner:** A web-based employee + payroll workspace for Lipa City Colleges: one admin app for people, attendance, pay, reports, and print-ready records — plus a self-service portal for employees.
+> **One-liner:** A web-based employee + payroll workspace for Paywise: one admin app for people, attendance, pay, reports, and print-ready records — plus a self-service portal for employees.
 >
 > **Status:** Actively developed. This document defines the **Minimum Viable Product**: the smallest scope that is genuinely usable by a real payroll administrator. Anything not listed here is explicitly out of MVP scope.
 >
@@ -10,7 +10,7 @@
 
 ## 1. Problem
 
-Payroll administration at LCC runs on employee records, attendance facts, pay computations, and formal printed documents. When these live in separate places (spreadsheets, paper files, chat messages), the failure modes are predictable:
+Payroll administration at Paywise runs on employee records, attendance facts, pay computations, and formal printed documents. When these live in separate places (spreadsheets, paper files, chat messages), the failure modes are predictable:
 
 - Employee data and pay data drift out of sync (wrong department, stale salary).
 - Payroll is prepared without seeing attendance exceptions first.
@@ -23,8 +23,8 @@ The MVP exists to remove exactly these four failure modes — nothing more.
 
 | Role | Who | Needs |
 |---|---|---|
-| **Payroll administrator** | LCC staff operating the system | Add/maintain employees, record attendance, prepare and track payroll, review monthly reports, print official records |
-| **Employee** | LCC personnel with portal access | View own profile, check own payroll history, time in/out daily, change own password |
+| **Payroll administrator** | Paywise staff operating the system | Add/maintain employees, record attendance, prepare and track payroll, review monthly reports, print official records |
+| **Employee** | Paywise personnel with portal access | View own profile, check own payroll history, time in/out daily, change own password |
 
 There is deliberately **no admin self-registration**: administrator accounts are provisioned out-of-band. The employee portal login is Employee ID + password issued by the administrator.
 
@@ -160,8 +160,8 @@ These are real needs but **not** required for v1. Do not build them before every
 ## 8. Tech & Run (5 minutes)
 
 - **Stack:** Plain PHP + MySQLi, FPDF via Composer (`setasign/fpdf`). No framework, no build step.
-- **Run:** XAMPP → place repo as a docroot subfolder → entry `index.php` redirects to `pages/login.php`.
-- **Database:** `config/database.php` → `localhost / root / '' / lcc_payroll`, `Asia/Manila`. Create the empty DB in phpMyAdmin, then import the canonical fresh-install schema from `database/` (`schema.sql`). Fresh installs only — never import over an old DB unless replacing it. (If `database/` is empty in your checkout, obtain the schema file before proceeding.)
+- **Run:** XAMPP → place repo as a docroot subfolder → entry `index.html` redirects to `login.php`.
+- **Database:** `config/database.php` → `localhost / root / '' / paywise_payroll`, `Asia/Manila`. Easiest fresh install: import `paywise_schema.sql` in phpMyAdmin (it creates the `paywise_payroll` database itself, no need to create anything first). Alternative: create the empty DB manually, then import `schema.sql`. Fresh installs only — never import over an old DB unless replacing it.
 - **Check a change:** `php -l <file>` + load the page. No tests/lint/CI in MVP.
 - **Standalone demo (not part of MVP):** `bpo_payroll_offer/` is a separate SQLite demo with its own README — shares nothing with the main app.
 
@@ -183,3 +183,5 @@ These are real needs but **not** required for v1. Do not build them before every
 - Works in light **and** dark mode, desktop **and** 360px mobile.
 - Printable where the module promises print.
 - `php -l` clean; manual walkthrough of its §6 journey passes.
+#   p a y - w i s e  
+ 
