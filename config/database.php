@@ -83,18 +83,218 @@ if (!function_exists('require_csrf')) {
     }
 }
 
-$dbHost = 'localhost';
-$dbUser = 'root';
-$dbPass = '';
-$dbName = 'paywise_payroll';
-
-$conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
-if ($conn->connect_errno) {
-    die('Database connection failed: ' . $conn->connect_error);
+if (!defined('MYSQLI_ASSOC')) {
+    define('MYSQLI_ASSOC', 1);
 }
-$conn->set_charset('utf8mb4');
-// Keep database dates/times aligned with the application's Philippines timezone.
-@$conn->query("SET time_zone = '+08:00'");
+
+/* Cross-driver DB layer: MySQL (XAMPP default) or Postgres/Supabase.
+   Set DB_DRIVER=pgsql + DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASS to use
+   Supabase. All app code keeps the mysqli-style API ($conn->prepare /
+   bind_param / execute / get_result / query / real_escape_string /
+   insert_id), backed by mysqli for mysql and by PDO for pgsql. */
+if (!class_exists('DbResult')) {
+    class DbResult
+    {
+        public int $num_rows = 0;
+        private array $rows;
+        private int $pos = 0;
+
+        public function __construct(array $rows)
+        {
+            $this->rows = array_values($rows);
+            $this->num_rows = count($this->rows);
+        }
+
+        public function fetch_assoc(): ?array
+        {
+            if ($this->pos >= count($this->rows)) return null;
+            return $this->rows[$this->pos++];
+        }
+
+        public function fetch_all($mode = null): array
+        {
+            return $this->rows;
+        }
+
+        public function data_seek(int $offset): bool
+        {
+            if ($offset < 0 || $offset > count($this->rows)) return false;
+            $this->pos = $offset;
+            return true;
+        }
+
+        public function free(): void
+        {
+        }
+    }
+}
+
+if (!class_exists('DbStmt')) {
+    class DbStmt
+    {
+        private PDO $pdo;
+        private string $sql;
+        private array $params = [];
+        private ?DbResult $result = null;
+        public int $affected_rows = 0;
+        public string $error = '';
+
+        public function __construct(PDO $pdo, string $sql)
+        {
+            $this->pdo = $pdo;
+            $this->sql = $sql;
+        }
+
+        // $types kept for mysqli call-compatibility; values are bound positionally.
+        public function bind_param(string $types, mixed ...$vars): bool
+        {
+            $this->params = array_values($vars);
+            return true;
+        }
+
+        public function execute(): bool
+        {
+            try {
+                $stmt = $this->pdo->prepare($this->sql);
+                $ok = $stmt->execute($this->params);
+                if (!$ok) {
+                    $this->error = implode(' ', $stmt->errorInfo());
+                    return false;
+                }
+                if ($stmt->columnCount() > 0) {
+                    $this->result = new DbResult($stmt->fetchAll(PDO::FETCH_ASSOC));
+                } else {
+                    $this->result = new DbResult([]);
+                    $this->affected_rows = $stmt->rowCount();
+                }
+                return true;
+            } catch (Throwable $e) {
+                $this->error = $e->getMessage();
+                return false;
+            }
+        }
+
+        public function get_result(): DbResult
+        {
+            return $this->result ?? new DbResult([]);
+        }
+
+        public function close(): void
+        {
+        }
+    }
+}
+
+if (!class_exists('DbConn')) {
+    class DbConn
+    {
+        private PDO $pdo;
+        public int $connect_errno = 0;
+        public string $connect_error = '';
+        public string $error = '';
+
+        public function __construct(PDO $pdo)
+        {
+            $this->pdo = $pdo;
+        }
+
+        public function prepare(string $sql): DbStmt|false
+        {
+            try {
+                $this->pdo->prepare($sql);
+            } catch (Throwable $e) {
+                $this->error = $e->getMessage();
+                return false;
+            }
+            return new DbStmt($this->pdo, $sql);
+        }
+
+        public function query(string $sql): DbResult|false
+        {
+            // Translate the MySQL timezone bootstrap to Postgres.
+            if (preg_match('/^\s*SET\s+time_zone\s*=/i', $sql)) {
+                try {
+                    $this->pdo->exec("SET TIME ZONE 'Asia/Manila'");
+                } catch (Throwable $e) {
+                    $this->error = $e->getMessage();
+                    return false;
+                }
+                return new DbResult([]);
+            }
+            try {
+                $stmt = $this->pdo->query($sql);
+            } catch (Throwable $e) {
+                $this->error = $e->getMessage();
+                return false;
+            }
+            if ($stmt->columnCount() > 0) {
+                return new DbResult($stmt->fetchAll(PDO::FETCH_ASSOC));
+            }
+            return new DbResult([]);
+        }
+
+        public function real_escape_string(string $s): string
+        {
+            $q = $this->pdo->quote($s);
+            if ($q === false || strlen($q) < 2) return addslashes($s);
+            return substr($q, 1, -1);
+        }
+
+        public function set_charset(string $charset): bool
+        {
+            return true;
+        }
+
+        public function __get(string $name): mixed
+        {
+            if ($name === 'insert_id') {
+                try {
+                    $v = $this->pdo->query('SELECT lastval()')->fetchColumn();
+                    return $v === false ? 0 : (int)$v;
+                } catch (Throwable) {
+                    return 0;
+                }
+            }
+            return null;
+        }
+    }
+}
+
+$dbDriver = strtolower((string)(getenv('DB_DRIVER') ?: 'mysql'));
+if ($dbDriver === 'pgsql' || $dbDriver === 'postgres' || $dbDriver === 'supabase') {
+    $dbDriver = 'pgsql';
+    $dbHost = getenv('DB_HOST') ?: getenv('SUPABASE_DB_HOST') ?: 'db.htlbmhkseweclwlixzlz.supabase.co';
+    $dbPort = getenv('DB_PORT') ?: getenv('SUPABASE_DB_PORT') ?: '5432';
+    $dbName = getenv('DB_NAME') ?: getenv('SUPABASE_DB_NAME') ?: 'postgres';
+    $dbUser = getenv('DB_USER') ?: getenv('SUPABASE_DB_USER') ?: 'postgres';
+    $dbPass = getenv('DB_PASS') ?: getenv('SUPABASE_DB_PASS') ?: '';
+    try {
+        $pdo = new PDO(
+            "pgsql:host={$dbHost};port={$dbPort};dbname={$dbName}",
+            $dbUser,
+            $dbPass,
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
+        );
+        $pdo->exec("SET TIME ZONE 'Asia/Manila'");
+    } catch (Throwable $e) {
+        die('Database connection failed: ' . $e->getMessage());
+    }
+    $conn = new DbConn($pdo);
+} else {
+    $dbDriver = 'mysql';
+    $dbHost = getenv('DB_HOST') ?: 'localhost';
+    $dbUser = getenv('DB_USER') ?: 'root';
+    $dbPass = getenv('DB_PASS') ?: '';
+    $dbName = getenv('DB_NAME') ?: 'paywise_payroll';
+
+    $conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+    if ($conn->connect_errno) {
+        die('Database connection failed: ' . $conn->connect_error);
+    }
+    $conn->set_charset('utf8mb4');
+    // Keep database dates/times aligned with the application's Philippines timezone.
+    @$conn->query("SET time_zone = '+08:00'");
+}
 
 if (!function_exists('dept_color_key')) {
     /* Department identity color key shared by every surface (directory,

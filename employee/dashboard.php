@@ -5,7 +5,7 @@ require_once __DIR__.'/layout.php';
 $employee = current_employee($conn);
 if (!$employee) { header('Location: logout.php'); exit; }
 
-$attStmt = $conn->prepare("SELECT time_in,time_out,status FROM attendance WHERE employee_id=? AND attendance_date=CURDATE() LIMIT 1");
+$attStmt = $conn->prepare("SELECT time_in,time_out,status FROM attendance WHERE employee_id=? AND attendance_date=CURRENT_DATE LIMIT 1");
 $attStmt->bind_param('i', $employee['employee_id']);
 $attStmt->execute();
 $todayAttendance = $attStmt->get_result()->fetch_assoc();
@@ -15,8 +15,10 @@ $payStmt->bind_param('i', $employee['employee_id']);
 $payStmt->execute();
 $pay = $payStmt->get_result()->fetch_assoc();
 
-$monthStmt = $conn->prepare("SELECT COUNT(*) AS total, SUM(status='Present') AS present, SUM(status='Late') AS late, SUM(status='Absent') AS absent FROM attendance WHERE employee_id=? AND attendance_date>=DATE_FORMAT(CURDATE(),'%Y-%m-01') AND attendance_date<=LAST_DAY(CURDATE())");
-$monthStmt->bind_param('i', $employee['employee_id']);
+$monthStart = date('Y-m-01');
+$monthEnd = date('Y-m-t');
+$monthStmt = $conn->prepare("SELECT COUNT(*) AS total, SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) AS present, SUM(CASE WHEN status='Late' THEN 1 ELSE 0 END) AS late, SUM(CASE WHEN status='Absent' THEN 1 ELSE 0 END) AS absent FROM attendance WHERE employee_id=? AND attendance_date>=? AND attendance_date<=?");
+$monthStmt->bind_param('iss', $employee['employee_id'], $monthStart, $monthEnd);
 $monthStmt->execute();
 $monthAttendance = $monthStmt->get_result()->fetch_assoc();
 

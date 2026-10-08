@@ -32,14 +32,15 @@ for ($i = 5; $i >= 0; $i--) {
 }
 $trendStart = array_key_first($trend) . '-01';
 $trendEnd = date('Y-m-t', strtotime($monthStart));
-$stmt = $conn->prepare("SELECT DATE_FORMAT(period_end,'%Y-%m') AS ym, COALESCE(SUM(gross_pay),0) AS gross, COALESCE(SUM(net_pay),0) AS net FROM payroll_records WHERE period_end BETWEEN ? AND ? GROUP BY ym ORDER BY ym");
+$stmt = $conn->prepare("SELECT EXTRACT(YEAR FROM period_end) AS y, EXTRACT(MONTH FROM period_end) AS m, COALESCE(SUM(gross_pay),0) AS gross, COALESCE(SUM(net_pay),0) AS net FROM payroll_records WHERE period_end BETWEEN ? AND ? GROUP BY EXTRACT(YEAR FROM period_end), EXTRACT(MONTH FROM period_end) ORDER BY y, m");
 $stmt->bind_param('ss', $trendStart, $trendEnd);
 $stmt->execute();
 $trendResult = $stmt->get_result();
 while ($row = $trendResult->fetch_assoc()) {
-    if (isset($trend[$row['ym']])) {
-        $trend[$row['ym']]['gross'] = (float)$row['gross'];
-        $trend[$row['ym']]['net'] = (float)$row['net'];
+    $key = sprintf('%04d-%02d', (int)$row['y'], (int)$row['m']);
+    if (isset($trend[$key])) {
+        $trend[$key]['gross'] = (float)$row['gross'];
+        $trend[$key]['net'] = (float)$row['net'];
     }
 }
 $trendMax = 1;

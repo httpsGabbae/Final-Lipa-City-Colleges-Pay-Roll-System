@@ -85,7 +85,7 @@ function employee_full_name_last_first(array $employee): string
     return trim($employee['last_name'] . ', ' . $employee['first_name'] . ' ' . ($employee['middle_name'] ?? ''));
 }
 
-function setting(mysqli $conn, string $key, string $default = ''): string
+function setting($conn, string $key, string $default = ''): string
 {
     $stmt = $conn->prepare('SELECT setting_value FROM app_settings WHERE setting_key = ? LIMIT 1');
     $stmt->bind_param('s', $key);
@@ -94,7 +94,7 @@ function setting(mysqli $conn, string $key, string $default = ''): string
     return $row['setting_value'] ?? $default;
 }
 
-function next_employee_no(mysqli $conn): string
+function next_employee_no($conn): string
 {
     $prefix = preg_replace('/[^0-9A-Za-z]/', '', setting($conn, 'employee_number_prefix', '25'));
     $digits = max(1, min(8, (int)setting($conn, 'employee_number_digits', '4')));

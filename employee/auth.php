@@ -16,7 +16,7 @@ function employee_photo_url(?string $path): string {
     $path = ltrim(trim((string)$path), '/\\');
     return $path === '' ? '' : '../' . $path;
 }
-function current_employee(mysqli $conn): ?array {
+function current_employee($conn): ?array {
     $id = (int)($_SESSION['employee_id'] ?? 0);
     if ($id <= 0) return null;
     $stmt = $conn->prepare('SELECT * FROM employees WHERE employee_id=? LIMIT 1');

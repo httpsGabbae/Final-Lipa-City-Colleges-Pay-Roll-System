@@ -60,7 +60,7 @@ $todayTypes = 's';
 if ($department !== '') { $todayWhere[] = 'e.department = ?'; $todayParams[] = $department; $todayTypes .= 's'; }
 if ($position !== '') { $todayWhere[] = 'e.position = ?'; $todayParams[] = $position; $todayTypes .= 's'; }
 if ($employeeId > 0) { $todayWhere[] = 'e.employee_id = ?'; $todayParams[] = $employeeId; $todayTypes .= 'i'; }
-$summarySql = 'SELECT COUNT(CASE WHEN a.time_in IS NOT NULL THEN 1 END) timed_in, COUNT(CASE WHEN a.time_in IS NOT NULL AND a.time_out IS NOT NULL THEN 1 END) completed, COUNT(CASE WHEN a.status="Late" THEN 1 END) late_count FROM attendance a JOIN employees e ON e.employee_id=a.employee_id WHERE ' . implode(' AND ', $todayWhere);
+$summarySql = 'SELECT COUNT(CASE WHEN a.time_in IS NOT NULL THEN 1 END) timed_in, COUNT(CASE WHEN a.time_in IS NOT NULL AND a.time_out IS NOT NULL THEN 1 END) completed, COUNT(CASE WHEN a.status=\'Late\' THEN 1 END) late_count FROM attendance a JOIN employees e ON e.employee_id=a.employee_id WHERE ' . implode(' AND ', $todayWhere);
 $summary = $conn->prepare($summarySql);
 $summary->bind_param($todayTypes, ...$todayParams);
 $summary->execute();

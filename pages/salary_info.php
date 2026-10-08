@@ -12,7 +12,7 @@ $employee = $stmt->get_result()->fetch_assoc();
 if (!$employee) { http_response_code(404); exit('<div class="notice err">Employee not found.</div>'); }
 
 $summary = ['gross' => 0, 'net' => 0, 'count' => 0, 'latest_net' => 0, 'latest_period' => null];
-$stmt = $conn->prepare('SELECT COALESCE(SUM(gross_pay),0) gross, COALESCE(SUM(net_pay),0) net, COUNT(*) count FROM payroll_records WHERE employee_id=? AND YEAR(period_end)=YEAR(CURDATE())');
+$stmt = $conn->prepare('SELECT COALESCE(SUM(gross_pay),0) gross, COALESCE(SUM(net_pay),0) net, COUNT(*) count FROM payroll_records WHERE employee_id=? AND EXTRACT(YEAR FROM period_end)=EXTRACT(YEAR FROM CURRENT_DATE)');
 $stmt->bind_param('i', $id); $stmt->execute();
 if ($r = $stmt->get_result()->fetch_assoc()) $summary = array_merge($summary, $r);
 $stmt = $conn->prepare('SELECT net_pay,period_end FROM payroll_records WHERE employee_id=? ORDER BY period_end DESC,payroll_id DESC LIMIT 1');

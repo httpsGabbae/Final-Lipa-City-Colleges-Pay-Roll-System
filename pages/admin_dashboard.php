@@ -24,7 +24,7 @@ if ($r = $conn->query("SELECT COUNT(CASE WHEN time_in IS NOT NULL THEN 1 END) ti
 }
 
 $payrollCount = $payrollGross = $payrollNet = $payrollDed = $payrollPaid = $payrollDrafts = 0; $payrollLabel = 'No payroll records yet — create the first payroll to start the pipeline';
-if ($r = $conn->query("SELECT COUNT(*) total, COALESCE(SUM(gross_pay),0) gross, COALESCE(SUM(net_pay),0) net, COALESCE(SUM(deductions),0) ded, COALESCE(SUM(status='Paid'),0) paid, COALESCE(SUM(status='Draft'),0) drafts FROM payroll_records WHERE period_start >= '" . date('Y-m-01') . "' AND period_start <= '" . date('Y-m-t') . "'")) {
+if ($r = $conn->query("SELECT COUNT(*) total, COALESCE(SUM(gross_pay),0) gross, COALESCE(SUM(net_pay),0) net, COALESCE(SUM(deductions),0) ded, COALESCE(SUM(CASE WHEN status='Paid' THEN 1 ELSE 0 END),0) paid, COALESCE(SUM(CASE WHEN status='Draft' THEN 1 ELSE 0 END),0) drafts FROM payroll_records WHERE period_start >= '" . date('Y-m-01') . "' AND period_start <= '" . date('Y-m-t') . "'")) {
     $p = $r->fetch_assoc(); $payrollCount=(int)$p['total']; $payrollGross=(float)$p['gross']; $payrollNet=(float)$p['net']; $payrollDed=(float)$p['ded']; $payrollPaid=(int)$p['paid']; $payrollDrafts=(int)$p['drafts'];
 }
 if ($payrollCount) $payrollLabel = $payrollCount . ' payroll record' . ($payrollCount === 1 ? '' : 's') . ' this month';
@@ -39,8 +39,15 @@ for ($i = 5; $i >= 0; $i--) {
     $hireTrend[$k] = 0;
 }
 $cut = date('Y-m-01', strtotime('-5 month'));
-if ($r = $conn->query("SELECT DATE_FORMAT(created_at,'%Y-%m') m, COUNT(*) c FROM employees WHERE created_at IS NOT NULL AND created_at >= '" . $conn->real_escape_string($cut) . "' GROUP BY m")) {
-    while ($row = $r->fetch_assoc()) { if (array_key_exists($row['m'], $hireTrend)) $hireTrend[$row['m']] = (int)$row['c']; }
+$hireStmt = $conn->prepare("SELECT EXTRACT(YEAR FROM created_at) AS y, EXTRACT(MONTH FROM created_at) AS m, COUNT(*) c FROM employees WHERE created_at IS NOT NULL AND created_at >= ? GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at) ORDER BY y, m");
+if ($hireStmt) {
+    $hireStmt->bind_param('s', $cut);
+    $hireStmt->execute();
+    $r = $hireStmt->get_result();
+    while ($row = $r->fetch_assoc()) {
+        $k = sprintf('%04d-%02d', (int)$row['y'], (int)$row['m']);
+        if (array_key_exists($k, $hireTrend)) $hireTrend[$k] = (int)$row['c'];
+    }
 }
 $hireVals = array_values($hireTrend);
 $hireMax = max(1, max($hireVals));

@@ -23,10 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $now = date('H:i:s');
             if ($record) {
-                $up = $conn->prepare('UPDATE attendance SET time_in=?, status="Present" WHERE attendance_id=?');
+                $up = $conn->prepare("UPDATE attendance SET time_in=?, status='Present' WHERE attendance_id=?");
                 $up->bind_param('si', $now, $record['attendance_id']);
             } else {
-                $up = $conn->prepare('INSERT INTO attendance(employee_id,attendance_date,time_in,status) VALUES(?,?,?,"Present")');
+                $up = $conn->prepare("INSERT INTO attendance(employee_id,attendance_date,time_in,status) VALUES(?,?,?,'Present')");
                 $up->bind_param('iss', $employee['employee_id'], $today, $now);
             }
             if ($up->execute()) $message = 'Time in recorded at ' . date('h:i A', strtotime($now)) . '.';
