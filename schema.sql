@@ -35,17 +35,20 @@ CREATE TABLE admins (
     username VARCHAR(50) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
+    role ENUM('superadmin','finance','hr') NOT NULL DEFAULT 'superadmin',
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (admin_id),
     UNIQUE KEY uq_admin_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO admins
-    (admin_id, username, password_hash, full_name, created_at)
+    (admin_id, username, password_hash, full_name, role, is_active, created_at)
 VALUES
     (1, 'admin',
      '$2y$10$cK4PFcHW5dXRAMOZuTb2GeBosLrZWt7WSfV7NACSSFcfZPo.PbWHK',
      'System Administrator',
+     'superadmin', 1,
      '2026-08-13 05:25:14');
 
 -- --------------------------------------------------------
@@ -85,28 +88,28 @@ CREATE TABLE departments (
 INSERT INTO departments
     (department_id, department_name, department_code, description, status, created_at, updated_at)
 VALUES
-(1, 'College of Computing Technology and Engineering', 'CCTE',
- 'College of Computing Technology and Engineering', 'Active',
+(1, 'Operations', 'OPS',
+ 'Company operations and field teams', 'Active',
  '2026-09-08 14:56:08', '2026-09-09 08:16:01'),
 
-(2, 'College of Nursing', 'CON',
- 'College of Nursing', 'Active',
+(2, 'Finance & Accounting', 'FIN',
+ 'Finance, accounting and payroll', 'Active',
  '2026-09-08 14:56:08', '2026-09-09 08:16:01'),
 
-(3, 'College of Internal and Tourism Management', 'CITM',
- 'College of Internal and Tourism Management', 'Active',
+(3, 'Human Resources', 'HR',
+ 'People, hiring and personnel records', 'Active',
  '2026-09-08 14:56:08', '2026-09-09 08:16:01'),
 
-(4, 'College of Criminal Justice Education', 'CCJE',
- 'College of Criminal Justice Education', 'Active',
+(4, 'Information Technology', 'IT',
+ 'Systems, software and IT support', 'Active',
  '2026-09-08 14:56:08', '2026-09-09 08:16:01'),
 
-(5, 'College of Business Accountancy', 'CBA',
- 'College of Business Accountancy', 'Active',
+(5, 'Sales & Marketing', 'SALES',
+ 'Sales, marketing and client growth', 'Active',
  '2026-09-08 14:56:08', '2026-09-09 08:16:01'),
 
-(6, 'College of Education and Liberal Arts', 'CELA',
- 'College of Education and Liberal Arts', 'Active',
+(6, 'Customer Support', 'SUPPORT',
+ 'Customer service and client support', 'Active',
  '2026-09-08 14:56:08', '2026-09-09 08:16:01');
 
 -- --------------------------------------------------------
@@ -129,77 +132,35 @@ CREATE TABLE positions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO positions (position_id, department_id, position_name, created_at) VALUES
-(1,1,'Dean','2026-09-08 14:56:08'),
-(2,1,'Department Head','2026-09-08 14:56:08'),
-(3,1,'Coordinator','2026-09-08 14:56:08'),
-(4,1,'Professor','2026-09-08 14:56:08'),
-(5,1,'Associate Professor','2026-09-08 14:56:08'),
-(6,1,'Assistant Professor','2026-09-08 14:56:08'),
-(7,1,'Instructor','2026-09-08 14:56:08'),
-(8,1,'Lecturer','2026-09-08 14:56:08'),
-(9,1,'Staff','2026-09-08 14:56:08'),
-(10,1,'Administrative Staff','2026-09-08 14:56:08'),
-(11,1,'Laboratory Staff','2026-09-08 14:56:08'),
-(12,1,'Technician','2026-09-08 14:56:08'),
-(13,1,'IT Staff','2026-09-08 14:56:08'),
+(1,1,''Operations Manager'','2026-09-08 14:56:08''),
+(2,1,''Supervisor'','2026-09-08 14:56:08''),
+(3,1,''Team Lead'','2026-09-08 14:56:08''),
+(4,1,''Staff'','2026-09-08 14:56:08''),
+(5,1,''Assistant'','2026-09-08 14:56:08''),
 
-(14,2,'Dean','2026-09-08 14:56:08'),
-(15,2,'Department Head','2026-09-08 14:56:08'),
-(16,2,'Coordinator','2026-09-08 14:56:08'),
-(17,2,'Professor','2026-09-08 14:56:08'),
-(18,2,'Associate Professor','2026-09-08 14:56:08'),
-(19,2,'Assistant Professor','2026-09-08 14:56:08'),
-(20,2,'Instructor','2026-09-08 14:56:08'),
-(21,2,'Lecturer','2026-09-08 14:56:08'),
-(22,2,'Clinical Instructor','2026-09-08 14:56:08'),
-(23,2,'Staff','2026-09-08 14:56:08'),
-(24,2,'Administrative Staff','2026-09-08 14:56:08'),
-(25,2,'Laboratory Staff','2026-09-08 14:56:08'),
+(6,2,''Finance Manager'','2026-09-08 14:56:08''),
+(7,2,''Accountant'','2026-09-08 14:56:08''),
+(8,2,''Payroll Officer'','2026-09-08 14:56:08''),
+(9,2,''Staff'','2026-09-08 14:56:08''),
 
-(26,3,'Dean','2026-09-08 14:56:08'),
-(27,3,'Department Head','2026-09-08 14:56:08'),
-(28,3,'Coordinator','2026-09-08 14:56:08'),
-(29,3,'Professor','2026-09-08 14:56:08'),
-(30,3,'Associate Professor','2026-09-08 14:56:08'),
-(31,3,'Assistant Professor','2026-09-08 14:56:08'),
-(32,3,'Instructor','2026-09-08 14:56:08'),
-(33,3,'Lecturer','2026-09-08 14:56:08'),
-(34,3,'Staff','2026-09-08 14:56:08'),
-(35,3,'Administrative Staff','2026-09-08 14:56:08'),
+(10,3,''HR Manager'','2026-09-08 14:56:08''),
+(11,3,''HR Officer'','2026-09-08 14:56:08''),
+(12,3,''Recruiter'','2026-09-08 14:56:08''),
+(13,3,''Staff'','2026-09-08 14:56:08''),
 
-(36,4,'Dean','2026-09-08 14:56:08'),
-(37,4,'Department Head','2026-09-08 14:56:08'),
-(38,4,'Coordinator','2026-09-08 14:56:08'),
-(39,4,'Professor','2026-09-08 14:56:08'),
-(40,4,'Associate Professor','2026-09-08 14:56:08'),
-(41,4,'Assistant Professor','2026-09-08 14:56:08'),
-(42,4,'Instructor','2026-09-08 14:56:08'),
-(43,4,'Lecturer','2026-09-08 14:56:08'),
-(44,4,'Staff','2026-09-08 14:56:08'),
-(45,4,'Administrative Staff','2026-09-08 14:56:08'),
+(14,4,''IT Manager'','2026-09-08 14:56:08''),
+(15,4,''Developer'','2026-09-08 14:56:08''),
+(16,4,''Support Specialist'','2026-09-08 14:56:08''),
+(17,4,''Staff'','2026-09-08 14:56:08''),
 
-(46,5,'Dean','2026-09-08 14:56:08'),
-(47,5,'Department Head','2026-09-08 14:56:08'),
-(48,5,'Coordinator','2026-09-08 14:56:08'),
-(49,5,'Professor','2026-09-08 14:56:08'),
-(50,5,'Associate Professor','2026-09-08 14:56:08'),
-(51,5,'Assistant Professor','2026-09-08 14:56:08'),
-(52,5,'Instructor','2026-09-08 14:56:08'),
-(53,5,'Lecturer','2026-09-08 14:56:08'),
-(54,5,'Staff','2026-09-08 14:56:08'),
-(55,5,'Administrative Staff','2026-09-08 14:56:08'),
-(56,5,'Accountant','2026-09-08 14:56:08'),
+(18,5,''Sales Manager'','2026-09-08 14:56:08''),
+(19,5,''Sales Officer'','2026-09-08 14:56:08''),
+(20,5,''Marketing Officer'','2026-09-08 14:56:08''),
+(21,5,''Staff'','2026-09-08 14:56:08''),
 
-(57,6,'Dean','2026-09-08 14:56:08'),
-(58,6,'Department Head','2026-09-08 14:56:08'),
-(59,6,'Coordinator','2026-09-08 14:56:08'),
-(60,6,'Professor','2026-09-08 14:56:08'),
-(61,6,'Associate Professor','2026-09-08 14:56:08'),
-(62,6,'Assistant Professor','2026-09-08 14:56:08'),
-(63,6,'Instructor','2026-09-08 14:56:08'),
-(64,6,'Lecturer','2026-09-08 14:56:08'),
-(65,6,'Staff','2026-09-08 14:56:08'),
-(66,6,'Administrative Staff','2026-09-08 14:56:08');
+(22,6,''Support Manager'','2026-09-08 14:56:08''),
+(23,6,''Support Agent'','2026-09-08 14:56:08''),
+(24,6,''Staff'','2026-09-08 14:56:08'');
 
 -- --------------------------------------------------------
 -- EMPLOYEES
@@ -268,7 +229,7 @@ CREATE TABLE employees (
 INSERT INTO employees
     (employee_no, portal_password, first_name, middle_name, last_name, gender, email, department, position, employment_status, basic_salary, date_hired)
 VALUES
-    ('25-0001', '$2y$12$RgvcOSwmrocDtSEbbT2zFO6V5mgTwm4Q12Vj7jg5TKIAPnJ0rjngG', 'Juan', 'D.', 'Dela Cruz', 'Male', 'juan.delacruz@example.com', 'College of Computing Technology and Engineering', 'Instructor', 'Regular', 25000.00, '2026-06-01')
+    ('25-0001', '$2y$12$RgvcOSwmrocDtSEbbT2zFO6V5mgTwm4Q12Vj7jg5TKIAPnJ0rjngG', 'Juan', 'D.', 'Dela Cruz', 'Male', 'juan.delacruz@example.com', 'Operations', 'Team Lead', 'Regular', 25000.00, '2026-06-01')
 ON DUPLICATE KEY UPDATE
     portal_password = VALUES(portal_password);
 

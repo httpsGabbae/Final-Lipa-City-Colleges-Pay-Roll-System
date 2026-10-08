@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
+require_role('superadmin', 'finance');
 
 $id=(int)($_GET['id'] ?? 0);
 $stmt=$conn->prepare('SELECT p.*,e.employee_no,e.first_name,e.middle_name,e.last_name,e.department,e.position,e.employment_status FROM payroll_records p JOIN employees e ON e.employee_id=p.employee_id WHERE p.payroll_id=? LIMIT 1');

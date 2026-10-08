@@ -40,15 +40,21 @@ function early_paint_state(): void
 function sidebar(string $active): void
 {
     early_paint_state();
+    // [key, icon, label, url, section header, roles allowed]
     $items = [
-        ['dashboard', 'dashboard', 'Dashboard', '../pages/admin_dashboard.php'],
-        ['employees', 'users', 'Employees', '../pages/employees.php'],
-        ['departments', 'building', 'Departments', '../pages/departments.php'],
-        ['add', 'user-plus', 'Add Employee', '../pages/personalinfo.php?mode=new'],
-        ['attendance', 'clock', 'Attendance', '../pages/attendance.php'],
-        ['payroll', 'wallet', 'Payroll', '../pages/payroll.php'],
-        ['reports', 'file-chart', 'Reports', '../pages/reports.php']
+        ['dashboard', 'dashboard', 'Dashboard', '../pages/admin_dashboard.php', 'OVERVIEW', ['superadmin', 'finance', 'hr']],
+        ['employees', 'users', 'Employees', '../pages/employees.php', 'PEOPLE', ['superadmin', 'hr']],
+        ['departments', 'building', 'Departments', '../pages/departments.php', null, ['superadmin', 'hr']],
+        ['add', 'user-plus', 'Add Employee', '../pages/personalinfo.php?mode=new', null, ['superadmin', 'hr']],
+        ['attendance', 'clock', 'Attendance', '../pages/attendance.php', 'WORKFORCE', ['superadmin', 'hr']],
+        ['payroll', 'wallet', 'Payroll', '../pages/payroll.php', 'PAYROLL', ['superadmin', 'finance', 'hr']],
+        ['reports', 'file-chart', 'Reports', '../pages/reports.php', 'INSIGHTS', ['superadmin', 'finance']],
+        ['accounts', 'shield', 'Accounts', '../pages/accounts.php', 'SYSTEM', ['superadmin']],
     ];
+    $role = function_exists('admin_role') ? admin_role() : 'superadmin';
+    $items = array_values(array_filter($items, function ($item) use ($role) {
+        return in_array($role, $item[5], true);
+    }));
 
     echo '<aside class="sidebar" id="appSidebar">';
     echo '<button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Collapse sidebar" title="Collapse sidebar">' . ui_icon('arrow-left') . '</button>';
@@ -58,12 +64,13 @@ function sidebar(string $active): void
     echo '</a>';
 
     echo '<nav class="nav">';
-    echo '<div class="nav-section">OVERVIEW</div>';
+    $lastSection = null;
     foreach ($items as $item) {
-        if ($item[0] === 'employees') echo '<div class="nav-section nav-section-spaced">PEOPLE</div>';
-        if ($item[0] === 'attendance') echo '<div class="nav-section nav-section-spaced">WORKFORCE</div>';
-        if ($item[0] === 'payroll') echo '<div class="nav-section nav-section-spaced">PAYROLL</div>';
-        if ($item[0] === 'reports') echo '<div class="nav-section nav-section-spaced">INSIGHTS</div>';
+        if ($item[4] !== null && $item[4] !== $lastSection) {
+            $lastSection = $item[4];
+            $spaced = $item[4] === 'OVERVIEW' ? '' : ' nav-section-spaced';
+            echo '<div class="nav-section' . $spaced . '">' . e($item[4]) . '</div>';
+        }
         $isActive = $active === $item[0] ? ' active' : '';
         $mobilePriority = in_array($item[0], ['dashboard','employees','attendance','payroll'], true) ? ' mobile-priority' : ' mobile-secondary';
         echo '<a class="nav-link' . $isActive . $mobilePriority . '" href="' . e($item[3]) . '" title="' . e($item[2]) . '" data-nav-title="' . e($item[2]) . '">';
@@ -74,9 +81,13 @@ function sidebar(string $active): void
     echo '<div class="mobile-more-wrap">';
     echo '<button type="button" class="mobile-more-toggle" aria-expanded="false" aria-label="More navigation"><span class="nav-icon">' . ui_icon('more') . '</span><span class="nav-label">More</span></button>';
     echo '<div class="mobile-more-menu" role="menu">';
+    if (in_array($role, ['superadmin', 'hr'], true)) {
     echo '<a href="../pages/departments.php" role="menuitem"><span>' . ui_icon('building') . '</span>Departments</a>';
     echo '<a href="../pages/personalinfo.php?mode=new" role="menuitem"><span>' . ui_icon('user-plus') . '</span>Add Employee</a>';
+    }
+    if (in_array($role, ['superadmin', 'finance'], true)) {
     echo '<a href="../pages/reports.php" role="menuitem"><span>' . ui_icon('file-chart') . '</span>Reports</a>';
+    }
     echo '</div></div>';
 
     // echo '<div class="sidebar-help">';
@@ -89,6 +100,8 @@ function topbar(string $title): void
 {
     $adminName = $_SESSION['admin_name'] ?? 'Admin';
     $initial = strtoupper(substr(trim($adminName), 0, 1)) ?: 'A';
+    $roleBadge = function_exists('role_label') ? role_label() : 'Admin';
+    $showAccounts = function_exists('is_superadmin') && is_superadmin();
 
     echo '<header class="topbar">';
     echo '<div class="topbar-left">';
@@ -102,7 +115,10 @@ function topbar(string $title): void
     echo '<span class="avatar">' . e($initial) . '</span><span class="admin-name">' . e($adminName) . '</span><span class="admin-chevron">⌄</span>';
     echo '</button>';
     echo '<div class="admin-dropdown" id="adminDropdown">';
-    echo '<div class="admin-dropdown-name">' . e($adminName) . '</div>';
+    echo '<div class="admin-dropdown-name">' . e($adminName) . '<span class="admin-role-badge">' . e($roleBadge) . '</span></div>';
+    if ($showAccounts) {
+    echo '<a class="dropdown-item" href="../pages/accounts.php"><span>⛨</span> Manage Accounts</a>';
+    }
     echo '<button type="button" class="dropdown-item" id="openSettings"><span>⚙</span> Account Settings</button>';
     echo '<a class="dropdown-item danger-item" href="../auth/logout.php"><span>↪</span> Logout</a>';
     echo '</div></div></div>';
@@ -118,7 +134,7 @@ function topbar(string $title): void
     echo '<label>Current Password<input type="password" name="current_password" required></label>';
     echo '<label>New Password<input type="password" name="new_password" minlength="8" required><small>Use at least 8 characters.</small></label>';
     echo '<label>Confirm New Password<input type="password" name="confirm_password" minlength="8" required></label>';
-    echo '<div class="admin-note"><strong>Administrator accounts</strong><span>This system does not allow administrators to create another admin account. To add a new admin, contact the developer.</span></div>';
+    echo '<div class="admin-note"><strong>Administrator accounts</strong><span>Only superadmins can create or deactivate accounts. Contact your superadmin for access changes.</span></div>';
     echo '<div id="passwordMessage" class="settings-message" hidden></div>';
     echo '<div class="settings-actions"><button type="button" class="btn btn-secondary" id="cancelSettings">Cancel</button><button type="submit" class="btn btn-primary">Confirm Password Change</button></div>';
     echo '</form></div></div></div>';
@@ -140,7 +156,7 @@ function tutorial(): void
         <!-- Step 1 -->
         <div class="tutorial-card" data-tutorial-step="0">
 
-            <div class="tutorial-icon">👋</div>
+            <div class="tutorial-icon" aria-hidden="true">1</div>
 
             <div class="tutorial-label">
                 ADMINISTRATOR GUIDE
@@ -179,7 +195,7 @@ function tutorial(): void
         <!-- Step 2 -->
         <div class="tutorial-card" data-tutorial-step="1">
 
-            <div class="tutorial-icon">⌂</div>
+            <div class="tutorial-icon" aria-hidden="true">2</div>
 
             <div class="tutorial-label">
                 STEP 1 OF 4
@@ -219,7 +235,7 @@ function tutorial(): void
         <!-- Step 3 -->
         <div class="tutorial-card" data-tutorial-step="2">
 
-            <div class="tutorial-icon">♙</div>
+            <div class="tutorial-icon" aria-hidden="true">3</div>
 
             <div class="tutorial-label">
                 STEP 2 OF 4
@@ -259,7 +275,7 @@ function tutorial(): void
         <!-- Step 4 -->
         <div class="tutorial-card" data-tutorial-step="3">
 
-            <div class="tutorial-icon">＋</div>
+            <div class="tutorial-icon" aria-hidden="true">4</div>
 
             <div class="tutorial-label">
                 STEP 3 OF 4
@@ -299,7 +315,7 @@ function tutorial(): void
         <!-- Step 5 -->
         <div class="tutorial-card" data-tutorial-step="4">
 
-            <div class="tutorial-icon">₱</div>
+            <div class="tutorial-icon" aria-hidden="true">5</div>
 
             <div class="tutorial-label">
                 STEP 4 OF 4

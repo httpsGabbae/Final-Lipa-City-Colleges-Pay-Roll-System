@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
+require_role('superadmin', 'hr');
 require_once __DIR__ . '/../includes/layout.php';
 
 $editId = (int)($_GET['edit'] ?? 0);
@@ -140,12 +141,12 @@ if ($departmentResult) {
 
 if (!$departments) {
     $departments = [
-        'College of Computing Technology and Engineering',
-        'College of Nursing',
-        'College of Internal and Tourism Management',
-        'College of Criminal Justice Education',
-        'College of Business Accountancy',
-        'College of Education and Liberal Arts'
+        'Operations',
+        'Finance & Accounting',
+        'Human Resources',
+        'Information Technology',
+        'Sales & Marketing',
+        'Customer Support'
     ];
 }
 

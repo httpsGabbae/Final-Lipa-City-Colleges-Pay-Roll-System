@@ -1,12 +1,21 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
+require_role('superadmin', 'finance', 'hr');
 require_once __DIR__ . '/../includes/layout.php';
+
+/* HR sees a masked, read-only view: pay figures are never queried and the
+   create/status actions are refused server-side (not just hidden). */
+$isHr = admin_role() === 'hr';
 
 $message = '';
 $error = '';
 $showForm = isset($_GET['add']) && $_GET['add'] === '1';
+if ($isHr) {
+    $showForm = false;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_role('superadmin', 'finance');
     require_csrf();
     $postAction = $_POST['action'] ?? 'create';
     if ($postAction === 'update_status') {
@@ -98,8 +107,48 @@ if (isset($_GET['status_updated'])) {
     $message = 'Payroll status updated.';
 }
 
-$records = $conn->query('SELECT p.*,e.employee_no,e.first_name,e.middle_name,e.last_name,e.department,e.position FROM payroll_records p JOIN employees e ON e.employee_id=p.employee_id ORDER BY p.payroll_id DESC');
-$employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,basic_salary FROM employees ORDER BY last_name,first_name');
+$records = $isHr
+    ? $conn->query('SELECT p.payroll_id,p.employee_id,p.period_start,p.period_end,p.status,e.employee_no,e.first_name,e.middle_name,e.last_name,e.department,e.position FROM payroll_records p JOIN employees e ON e.employee_id=p.employee_id ORDER BY p.payroll_id DESC')
+    : $conn->query('SELECT p.*,e.employee_no,e.first_name,e.middle_name,e.last_name,e.department,e.position FROM payroll_records p JOIN employees e ON e.employee_id=p.employee_id ORDER BY p.payroll_id DESC');
+$employees = $isHr ? false : $conn->query('SELECT employee_id,employee_no,first_name,last_name,basic_salary FROM employees ORDER BY last_name,first_name');
+
+/* HR attendance-per-period: one query for the whole list, bucketed in PHP
+   (no N+1), so HR can verify attendance logs behind each pay period. */
+$attByRecord = [];
+if ($isHr && $records && $records->num_rows > 0) {
+    $rows = [];
+    $minStart = null; $maxEnd = null; $empIds = [];
+    while ($r = $records->fetch_assoc()) {
+        $rows[] = $r;
+        $empIds[(int)$r['employee_id']] = true;
+        if ($minStart === null || $r['period_start'] < $minStart) $minStart = $r['period_start'];
+        if ($maxEnd === null || $r['period_end'] > $maxEnd) $maxEnd = $r['period_end'];
+    }
+    // Rewind for the template loop below.
+    $records->data_seek(0);
+    if ($empIds && $minStart !== null) {
+        $ids = implode(',', array_map('intval', array_keys($empIds)));
+        $stmt = $conn->prepare("SELECT employee_id,attendance_date,status,time_in FROM attendance WHERE employee_id IN ($ids) AND attendance_date >= ? AND attendance_date <= ?");
+        if ($stmt) {
+            $stmt->bind_param('ss', $minStart, $maxEnd);
+            $stmt->execute();
+            $logs = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            foreach ($rows as $r) {
+                $logged = 0; $late = 0;
+                foreach ($logs as $l) {
+                    if ((int)$l['employee_id'] !== (int)$r['employee_id']) continue;
+                    if ($l['attendance_date'] < $r['period_start'] || $l['attendance_date'] > $r['period_end']) continue;
+                    if ($l['time_in'] !== null || $l['status'] !== 'Absent') $logged++;
+                    if ($l['status'] === 'Late') $late++;
+                }
+                $attByRecord[(int)$r['payroll_id']] = $logged . ' day' . ($logged === 1 ? '' : 's') . ' logged' . ($late ? ' · ' . $late . ' late' : '');
+            }
+        }
+    }
+    foreach ($rows as $r) {
+        if (!isset($attByRecord[(int)$r['payroll_id']])) $attByRecord[(int)$r['payroll_id']] = 'No logs in period';
+    }
+}
 
 ?>
 <!doctype html>
@@ -125,15 +174,23 @@ $employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,b
             <div class="content">
                 <div class="page-heading">
                     <div>
+                        <?php if ($isHr): ?>
+                        <div class="eyebrow">Attendance Review</div>
+                        <h1>Payroll Periods</h1>
+                        <p>Verify the attendance logs behind each pay period. Pay figures are handled by Finance.</p>
+                        <?php else: ?>
                         <div class="eyebrow">Payroll Management</div>
                         <h1>All Payroll</h1>
                         <p>Review existing payroll records first. Add a new payroll only when you are ready.</p>
+                        <?php endif; ?>
                     </div>
+                    <?php if (!$isHr): ?>
                     <div class="print-tools">
                         <a class="btn btn-secondary" href="reports.php"><?php echo ui_icon('file-chart'); ?> Payroll Reports</a>
                         <button type="button" class="btn btn-secondary" onclick="window.print()"><?php echo ui_icon('printer'); ?> Print All Payroll</button>
                         <a class="btn btn-primary" href="payroll.php?add=1"><?php echo ui_icon('plus'); ?> Add New Payroll</a>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php if ($message): ?><div class="notice ok"><?php echo e($message); ?></div><?php endif; ?>
@@ -143,8 +200,13 @@ $employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,b
                     <div class="card-head">
                         <div>
                             <div class="eyebrow">Payroll Records</div>
+                            <?php if ($isHr): ?>
+                            <h2>Periods & Attendance</h2>
+                            <p>Attendance logs per pay period. Open Attendance for day-by-day detail.</p>
+                            <?php else: ?>
                             <h2>All Payroll Records</h2>
                             <p>Open a record to print a clean payroll slip.</p>
+                            <?php endif; ?>
                         </div>
                         
                     </div>
@@ -156,16 +218,25 @@ $employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,b
                                     <th>Department</th>
                                     <th>Position</th>
                                     <th>Period</th>
+                                    <?php if ($isHr): ?>
+                                    <th>Attendance</th>
+                                    <th>Status</th>
+                                    <?php else: ?>
                                     <th>Gross Pay</th>
                                     <th>Net Pay</th>
                                     <th>Status</th>
                                     <th>Action</th>
+                                    <?php endif; ?>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (!$records || $records->num_rows === 0): ?>
                                     <tr>
+                                        <?php if ($isHr): ?>
+                                        <td colspan="6" class="empty">No payroll periods yet.</td>
+                                        <?php else: ?>
                                         <td colspan="8" class="empty">No payroll records yet. Click <strong>Add New Payroll</strong> to create the first one.</td>
+                                        <?php endif; ?>
                                     </tr>
                                     <?php else: while ($row = $records->fetch_assoc()): ?>
                                         <tr>
@@ -176,10 +247,15 @@ $employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,b
                                             <td><?php echo e($row['department'] ?: 'Not assigned'); ?></td>
                                             <td><?php echo e($row['position'] ?: 'Not assigned'); ?></td>
                                             <td><?php echo e(date('M d, Y', strtotime($row['period_start'])) . ' - ' . date('M d, Y', strtotime($row['period_end']))); ?></td>
+                                            <?php if ($isHr): ?>
+                                            <td><a class="dash-link" style="margin:0;padding:0;border:0" href="attendance.php"><?php echo e($attByRecord[(int)$row['payroll_id']] ?? 'No logs in period'); ?></a></td>
+                                            <td><span class="badge"><?php echo e($row['status']); ?></span></td>
+                                            <?php else: ?>
                                             <td><?php echo money($row['gross_pay']); ?></td>
                                             <td><strong><?php echo money($row['net_pay']); ?></strong></td>
                                             <td><span class="badge"><?php echo e($row['status']); ?></span><form method="post" style="display:inline" onsubmit="return confirm('Update payroll status?')"><?php echo csrf_field(); ?><input type="hidden" name="action" value="update_status"><input type="hidden" name="payroll_id" value="<?php echo (int)$row['payroll_id']; ?>"><select name="status"><option value="Draft"<?php echo $row['status'] === 'Draft' ? ' selected' : ''; ?>>Draft</option><option value="Approved"<?php echo $row['status'] === 'Approved' ? ' selected' : ''; ?>>Approved</option><option value="Paid"<?php echo $row['status'] === 'Paid' ? ' selected' : ''; ?>>Paid</option></select><button type="submit" class="btn btn-secondary">Save</button></form></td>
                                             <td><div class="icon-actions"><button type="button" class="icon-action print" title="Print payroll statement" aria-label="Print payroll statement" onclick="printPayrollRecord(<?php echo (int)$row['payroll_id']; ?>); return false;"><?php echo ui_icon('printer'); ?></button></div></td>
+                                            <?php endif; ?>
                                         </tr>
                                 <?php endwhile;
                                 endif; ?>
@@ -188,11 +264,13 @@ $employees = $conn->query('SELECT employee_id,employee_no,first_name,last_name,b
                     </div>
                 </section>
 
+                <?php if (!$isHr): ?>
                 <section class="card report-shortcut">
                     <div class="report-shortcut-icon"><?php echo ui_icon('file-chart'); ?></div>
                     <div><div class="eyebrow">Payroll Reporting</div><h3>Need a month-by-month view?</h3><p>Open Payroll Reports to filter a month, review totals, and create a formal printable register.</p></div>
                     <a class="btn btn-secondary" href="reports.php">Open Reports <?php echo ui_icon('arrow-right'); ?></a>
                 </section>
+                <?php endif; ?>
 
                 <div id="nativePayrollPrintSheet" class="native-print-sheet" aria-hidden="true"></div>
 

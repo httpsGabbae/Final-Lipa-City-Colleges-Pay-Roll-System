@@ -1038,14 +1038,13 @@ input[type="file"] { padding: 8px 12px !important; height: auto !important; min-
   --info: #2f7fc4; --info-soft: rgba(47, 127, 196, 0.12);
   --violet: #7c5fc0; --violet-soft: rgba(124, 95, 192, 0.13);
   --neutral: #64777d; --neutral-soft: rgba(100, 119, 125, 0.14);
-  /* Named department identity hues (one meaning per department) */
-  --c-bsa: #c2920a; --c-bsa-soft: rgba(194, 146, 10, 0.15);
-  --c-ccte: #cf6f2e; --c-ccte-soft: rgba(207, 111, 46, 0.14);
-  --c-ccje: #d63d3d; --c-ccje-soft: rgba(214, 61, 61, 0.12);
-  --c-cba: #2f7fc4; --c-cba-soft: rgba(47, 127, 196, 0.13);
-  --c-cithm: #d63d3d; --c-cithm-soft: rgba(214, 61, 61, 0.12);
-  --c-nursing: #2f9e68; --c-nursing-soft: rgba(47, 158, 104, 0.13);
-  --c-cela: #7c5fc0; --c-cela-soft: rgba(124, 95, 192, 0.14);
+  /* Named department identity hues (one meaning per department, corporate) */
+  --c-ops: #c2920a; --c-ops-soft: rgba(194, 146, 10, 0.15);
+  --c-fin: #2f7fc4; --c-fin-soft: rgba(47, 127, 196, 0.13);
+  --c-hr: #2f9e68; --c-hr-soft: rgba(47, 158, 104, 0.13);
+  --c-it: #cf6f2e; --c-it-soft: rgba(207, 111, 46, 0.14);
+  --c-sales: #d63d3d; --c-sales-soft: rgba(214, 61, 61, 0.12);
+  --c-support: #7c5fc0; --c-support-soft: rgba(124, 95, 192, 0.14);
   --c-default: #0f9f9a; --c-default-soft: rgba(15, 159, 154, 0.13);
 }
 body.dark-mode {
@@ -1055,8 +1054,8 @@ body.dark-mode {
   --info: #6ea8e0; --info-soft: rgba(110, 168, 224, 0.15);
   --violet: #a98fe0; --violet-soft: rgba(169, 143, 224, 0.16);
   --neutral: #9fb3b8; --neutral-soft: rgba(159, 179, 184, 0.16);
-  --c-bsa: #e3b341; --c-ccte: #e08a4c; --c-ccje: #ef6b6b; --c-cba: #6ea8e0;
-  --c-cithm: #ef6b6b; --c-nursing: #4cc38a; --c-cela: #a98fe0; --c-default: #2dd4bf;
+  --c-ops: #e3b341; --c-fin: #6ea8e0; --c-hr: #4cc38a; --c-it: #e08a4c;
+  --c-sales: #ef6b6b; --c-support: #a98fe0; --c-default: #2dd4bf;
 }
 
 /* Badges speak their status */

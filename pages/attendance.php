@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
+require_role('superadmin', 'hr');
 require_once __DIR__ . '/../includes/layout.php';
 
 $message = '';
