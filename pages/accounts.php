@@ -105,7 +105,7 @@ $accounts = $conn->query('SELECT admin_id,username,full_name,role,is_active,crea
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="icon" type="image/png" href="../assets/favicon.png">
-    <title>Paywise</title>
+    <title>LCC Payroll System</title>
     <link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4">
     <link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9">
     <script src="../assets/js/app.js?v=20260916-rail5" defer></script>

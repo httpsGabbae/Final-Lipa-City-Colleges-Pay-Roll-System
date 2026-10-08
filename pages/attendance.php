@@ -82,7 +82,7 @@ elseif ($position !== '') $filterLabel = $position;
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <!-- FAVICON: Put your favicon file at /assets/favicon.png -->
 <link rel="icon" type="image/png" href="../assets/favicon.png">
-<title>Paywise</title>
+<title>LCC Payroll System</title>
 <link rel="stylesheet" href="../assets/css/app.css?v=20260909-rail4"><link rel="stylesheet" href="../assets/css/apple-system.css?v=20260916-apple9"><script src="../assets/js/app.js?v=20260916-rail5" defer></script><script src="../assets/js/apple-motion.js?v=20260916-apple1" defer></script>
 </head>
 <body>
@@ -116,7 +116,7 @@ elseif ($position !== '') $filterLabel = $position;
         <button class="btn btn-primary" type="submit">Apply Filters</button>
         <a class="btn btn-secondary" href="attendance.php">Reset</a>
     </form>
-    <div class="attendance-report-meta print-only"><strong>PAYWISE</strong><span>Attendance Report · <?php echo e(date('F Y', strtotime($start))); ?></span><span><?php echo e($filterLabel); ?></span></div>
+    <div class="attendance-report-meta print-only"><strong>LCC PAYROLL SYSTEM</strong><span>Attendance Report · <?php echo e(date('F Y', strtotime($start))); ?></span><span><?php echo e($filterLabel); ?></span></div>
     <div class="table-wrap">
     <table class="table attendance-table">
         <thead><tr><th>Date</th><th>Employee</th><th>Department</th><th>Position</th><th>Time In</th><th>Time Out</th><th>Status</th><th class="no-print"></th></tr></thead>
@@ -137,7 +137,7 @@ elseif ($position !== '') $filterLabel = $position;
         </tbody>
     </table>
     </div>
-    <div class="attendance-print-footer print-only">Generated <?php echo e(date('M d, Y h:i A')); ?> · Paywise</div>
+    <div class="attendance-print-footer print-only">Generated <?php echo e(date('M d, Y h:i A')); ?> · LCC Payroll System</div>
 </section>
 </div></main></div>
 
