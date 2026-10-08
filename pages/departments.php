@@ -217,11 +217,11 @@ function department_value(?array $department, string $key): string
                         <div class="form-grid">
                             <div class="field">
                                 <label>Department Name</label>
-                                <input type="text" name="department_name" maxlength="100" required value="<?php echo department_value($editDepartment, 'department_name'); ?>" placeholder="e.g. Operations">
+                                <input type="text" name="department_name" maxlength="100" required value="<?php echo department_value($editDepartment, 'department_name'); ?>" placeholder="e.g. College of Information Technology">
                             </div>
                             <div class="field">
                                 <label>Department Code <span class="mini">Optional</span></label>
-                                <input type="text" name="department_code" maxlength="30" value="<?php echo department_value($editDepartment, 'department_code'); ?>" placeholder="e.g. OPS">
+                                <input type="text" name="department_code" maxlength="30" value="<?php echo department_value($editDepartment, 'department_code'); ?>" placeholder="e.g. CITE">
                             </div>
                             <div class="field full">
                                 <label>Description <span class="mini">Optional</span></label>
@@ -297,7 +297,7 @@ function department_value(?array $department, string $key): string
                                     <?php echo csrf_field(); ?>
                                     <input type="hidden" name="action" value="save_position">
                                     <input type="hidden" name="position_department_id" value="<?php echo (int)$department['department_id']; ?>">
-                                    <input type="text" name="position_name" maxlength="120" required placeholder="e.g. Team Lead">
+                                    <input type="text" name="position_name" maxlength="120" required placeholder="e.g. Instructor">
                                     <button class="btn btn-primary btn-small" type="submit">+ Add Position</button>
                                 </form>
                                 <?php if (!$deptPositions): ?>
